@@ -1,0 +1,2075 @@
+
+hedgehog_C_UART.elf:     file format elf32-avr
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         00000f7e  00000000  00000000  00000074  2**1
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .bss          0000019d  00800060  00800060  00000ff2  2**0
+                  ALLOC
+  2 .stab         000006cc  00000000  00000000  00000ff4  2**2
+                  CONTENTS, READONLY, DEBUGGING
+  3 .stabstr      00000085  00000000  00000000  000016c0  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  4 .debug_aranges 00000020  00000000  00000000  00001745  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  5 .debug_pubnames 0000022a  00000000  00000000  00001765  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  6 .debug_info   00000570  00000000  00000000  0000198f  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  7 .debug_abbrev 00000123  00000000  00000000  00001eff  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  8 .debug_line   0000076c  00000000  00000000  00002022  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  9 .debug_frame  00000080  00000000  00000000  00002790  2**2
+                  CONTENTS, READONLY, DEBUGGING
+ 10 .debug_str    0000024c  00000000  00000000  00002810  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 11 .debug_pubtypes 0000002b  00000000  00000000  00002a5c  2**0
+                  CONTENTS, READONLY, DEBUGGING
+
+Disassembly of section .text:
+
+00000000 <__vectors>:
+   0:	0c 94 2a 00 	jmp	0x54	; 0x54 <__ctors_end>
+   4:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+   8:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+   c:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+  10:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+  14:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+  18:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+  1c:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+  20:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+  24:	0c 94 d2 00 	jmp	0x1a4	; 0x1a4 <__vector_9>
+  28:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+  2c:	0c 94 3e 00 	jmp	0x7c	; 0x7c <__vector_11>
+  30:	0c 94 79 00 	jmp	0xf2	; 0xf2 <__vector_12>
+  34:	0c 94 c2 00 	jmp	0x184	; 0x184 <__vector_13>
+  38:	0c 94 eb 06 	jmp	0xdd6	; 0xdd6 <__vector_14>
+  3c:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+  40:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+  44:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+  48:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+  4c:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+  50:	0c 94 3c 00 	jmp	0x78	; 0x78 <__bad_interrupt>
+
+00000054 <__ctors_end>:
+  54:	11 24       	eor	r1, r1
+  56:	1f be       	out	0x3f, r1	; 63
+  58:	cf e5       	ldi	r28, 0x5F	; 95
+  5a:	d4 e0       	ldi	r29, 0x04	; 4
+  5c:	de bf       	out	0x3e, r29	; 62
+  5e:	cd bf       	out	0x3d, r28	; 61
+
+00000060 <__do_clear_bss>:
+  60:	11 e0       	ldi	r17, 0x01	; 1
+  62:	a0 e6       	ldi	r26, 0x60	; 96
+  64:	b0 e0       	ldi	r27, 0x00	; 0
+  66:	01 c0       	rjmp	.+2      	; 0x6a <.do_clear_bss_start>
+
+00000068 <.do_clear_bss_loop>:
+  68:	1d 92       	st	X+, r1
+
+0000006a <.do_clear_bss_start>:
+  6a:	ad 3f       	cpi	r26, 0xFD	; 253
+  6c:	b1 07       	cpc	r27, r17
+  6e:	e1 f7       	brne	.-8      	; 0x68 <.do_clear_bss_loop>
+  70:	0e 94 e9 00 	call	0x1d2	; 0x1d2 <main>
+  74:	0c 94 bd 07 	jmp	0xf7a	; 0xf7a <_exit>
+
+00000078 <__bad_interrupt>:
+  78:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
+
+0000007c <__vector_11>:
+
+
+// обработчики прерываний UART.
+
+ISR(USART_RXC_vect)								// UART. Завершение приема
+{
+  7c:	1f 92       	push	r1
+  7e:	0f 92       	push	r0
+  80:	0f b6       	in	r0, 0x3f	; 63
+  82:	0f 92       	push	r0
+  84:	11 24       	eor	r1, r1
+  86:	2f 93       	push	r18
+  88:	3f 93       	push	r19
+  8a:	8f 93       	push	r24
+  8c:	9f 93       	push	r25
+  8e:	ef 93       	push	r30
+  90:	ff 93       	push	r31
+  92:	df 93       	push	r29
+  94:	cf 93       	push	r28
+  96:	cd b7       	in	r28, 0x3d	; 61
+  98:	de b7       	in	r29, 0x3e	; 62
+	array_modbas_in[count_modbas_in] = UDR;		// забираем принятый байт
+  9a:	80 91 79 00 	lds	r24, 0x0079
+  9e:	90 91 7a 00 	lds	r25, 0x007A
+  a2:	2c e2       	ldi	r18, 0x2C	; 44
+  a4:	30 e0       	ldi	r19, 0x00	; 0
+  a6:	f9 01       	movw	r30, r18
+  a8:	20 81       	ld	r18, Z
+  aa:	22 2f       	mov	r18, r18
+  ac:	30 e0       	ldi	r19, 0x00	; 0
+  ae:	88 0f       	add	r24, r24
+  b0:	99 1f       	adc	r25, r25
+  b2:	83 5f       	subi	r24, 0xF3	; 243
+  b4:	9e 4f       	sbci	r25, 0xFE	; 254
+  b6:	fc 01       	movw	r30, r24
+  b8:	31 83       	std	Z+1, r19	; 0x01
+  ba:	20 83       	st	Z, r18
+	count_modbas_in++;							// адрес на следующий элемент массива
+  bc:	80 91 79 00 	lds	r24, 0x0079
+  c0:	90 91 7a 00 	lds	r25, 0x007A
+  c4:	01 96       	adiw	r24, 0x01	; 1
+  c6:	90 93 7a 00 	sts	0x007A, r25
+  ca:	80 93 79 00 	sts	0x0079, r24
+	count_timer0 = 0;							// обнулили счётчик приёма.
+  ce:	10 92 73 00 	sts	0x0073, r1
+	flag_UART_in = 1;							// флаг старта приёма посылки
+  d2:	81 e0       	ldi	r24, 0x01	; 1
+  d4:	80 93 72 00 	sts	0x0072, r24
+}
+  d8:	cf 91       	pop	r28
+  da:	df 91       	pop	r29
+  dc:	ff 91       	pop	r31
+  de:	ef 91       	pop	r30
+  e0:	9f 91       	pop	r25
+  e2:	8f 91       	pop	r24
+  e4:	3f 91       	pop	r19
+  e6:	2f 91       	pop	r18
+  e8:	0f 90       	pop	r0
+  ea:	0f be       	out	0x3f, r0	; 63
+  ec:	0f 90       	pop	r0
+  ee:	1f 90       	pop	r1
+  f0:	18 95       	reti
+
+000000f2 <__vector_12>:
+
+
+
+
+ISR(USART_UDRE_vect)							// Прерывание по опустошению приёмного буфера UART. 
+{
+  f2:	1f 92       	push	r1
+  f4:	0f 92       	push	r0
+  f6:	0f b6       	in	r0, 0x3f	; 63
+  f8:	0f 92       	push	r0
+  fa:	11 24       	eor	r1, r1
+  fc:	2f 93       	push	r18
+  fe:	3f 93       	push	r19
+ 100:	8f 93       	push	r24
+ 102:	9f 93       	push	r25
+ 104:	ef 93       	push	r30
+ 106:	ff 93       	push	r31
+ 108:	df 93       	push	r29
+ 10a:	cf 93       	push	r28
+ 10c:	cd b7       	in	r28, 0x3d	; 61
+ 10e:	de b7       	in	r29, 0x3e	; 62
+	buffer_index++;								// Увеличиваем индекс
+ 110:	80 91 7d 00 	lds	r24, 0x007D
+ 114:	90 91 7e 00 	lds	r25, 0x007E
+ 118:	01 96       	adiw	r24, 0x01	; 1
+ 11a:	90 93 7e 00 	sts	0x007E, r25
+ 11e:	80 93 7d 00 	sts	0x007D, r24
+ 	
+	if(buffer_index == count_modbas_out)  		// Вывели весь буффер? 
+ 122:	20 91 7d 00 	lds	r18, 0x007D
+ 126:	30 91 7e 00 	lds	r19, 0x007E
+ 12a:	80 91 7b 00 	lds	r24, 0x007B
+ 12e:	90 91 7c 00 	lds	r25, 0x007C
+ 132:	28 17       	cp	r18, r24
+ 134:	39 07       	cpc	r19, r25
+ 136:	51 f4       	brne	.+20     	; 0x14c <__vector_12+0x5a>
+		{
+			UCSRB &=~(1<<UDRIE);				// Запрещаем прерывание по опустошению - передача закончена
+ 138:	8a e2       	ldi	r24, 0x2A	; 42
+ 13a:	90 e0       	ldi	r25, 0x00	; 0
+ 13c:	2a e2       	ldi	r18, 0x2A	; 42
+ 13e:	30 e0       	ldi	r19, 0x00	; 0
+ 140:	f9 01       	movw	r30, r18
+ 142:	20 81       	ld	r18, Z
+ 144:	2f 7d       	andi	r18, 0xDF	; 223
+ 146:	fc 01       	movw	r30, r24
+ 148:	20 83       	st	Z, r18
+ 14a:	0f c0       	rjmp	.+30     	; 0x16a <__vector_12+0x78>
+		}
+		else 
+		{
+			UDR = array_modbas_out[buffer_index];			// Берем данные из буффера. 
+ 14c:	8c e2       	ldi	r24, 0x2C	; 44
+ 14e:	90 e0       	ldi	r25, 0x00	; 0
+ 150:	20 91 7d 00 	lds	r18, 0x007D
+ 154:	30 91 7e 00 	lds	r19, 0x007E
+ 158:	22 0f       	add	r18, r18
+ 15a:	33 1f       	adc	r19, r19
+ 15c:	2b 57       	subi	r18, 0x7B	; 123
+ 15e:	3e 4f       	sbci	r19, 0xFE	; 254
+ 160:	f9 01       	movw	r30, r18
+ 162:	20 81       	ld	r18, Z
+ 164:	31 81       	ldd	r19, Z+1	; 0x01
+ 166:	fc 01       	movw	r30, r24
+ 168:	20 83       	st	Z, r18
+		}
+
+}
+ 16a:	cf 91       	pop	r28
+ 16c:	df 91       	pop	r29
+ 16e:	ff 91       	pop	r31
+ 170:	ef 91       	pop	r30
+ 172:	9f 91       	pop	r25
+ 174:	8f 91       	pop	r24
+ 176:	3f 91       	pop	r19
+ 178:	2f 91       	pop	r18
+ 17a:	0f 90       	pop	r0
+ 17c:	0f be       	out	0x3f, r0	; 63
+ 17e:	0f 90       	pop	r0
+ 180:	1f 90       	pop	r1
+ 182:	18 95       	reti
+
+00000184 <__vector_13>:
+
+
+
+
+ISR(USART_TXC_vect)								// Прерывание по завершению отправки байта UART.
+{
+ 184:	1f 92       	push	r1
+ 186:	0f 92       	push	r0
+ 188:	0f b6       	in	r0, 0x3f	; 63
+ 18a:	0f 92       	push	r0
+ 18c:	11 24       	eor	r1, r1
+ 18e:	df 93       	push	r29
+ 190:	cf 93       	push	r28
+ 192:	cd b7       	in	r28, 0x3d	; 61
+ 194:	de b7       	in	r29, 0x3e	; 62
+
+}
+ 196:	cf 91       	pop	r28
+ 198:	df 91       	pop	r29
+ 19a:	0f 90       	pop	r0
+ 19c:	0f be       	out	0x3f, r0	; 63
+ 19e:	0f 90       	pop	r0
+ 1a0:	1f 90       	pop	r1
+ 1a2:	18 95       	reti
+
+000001a4 <__vector_9>:
+
+
+// обработчики прерываний Timer0.
+
+ISR (TIMER0_OVF_vect)
+{
+ 1a4:	1f 92       	push	r1
+ 1a6:	0f 92       	push	r0
+ 1a8:	0f b6       	in	r0, 0x3f	; 63
+ 1aa:	0f 92       	push	r0
+ 1ac:	11 24       	eor	r1, r1
+ 1ae:	8f 93       	push	r24
+ 1b0:	df 93       	push	r29
+ 1b2:	cf 93       	push	r28
+ 1b4:	cd b7       	in	r28, 0x3d	; 61
+ 1b6:	de b7       	in	r29, 0x3e	; 62
+	count_timer0++;								// при 16 мгц и предделителе на 8, каждое переполнение 	
+ 1b8:	80 91 73 00 	lds	r24, 0x0073
+ 1bc:	8f 5f       	subi	r24, 0xFF	; 255
+ 1be:	80 93 73 00 	sts	0x0073, r24
+}												// это 0,0001275 с. 
+ 1c2:	cf 91       	pop	r28
+ 1c4:	df 91       	pop	r29
+ 1c6:	8f 91       	pop	r24
+ 1c8:	0f 90       	pop	r0
+ 1ca:	0f be       	out	0x3f, r0	; 63
+ 1cc:	0f 90       	pop	r0
+ 1ce:	1f 90       	pop	r1
+ 1d0:	18 95       	reti
+
+000001d2 <main>:
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////
+
+int main()
+{
+ 1d2:	df 93       	push	r29
+ 1d4:	cf 93       	push	r28
+ 1d6:	00 d0       	rcall	.+0      	; 0x1d8 <main+0x6>
+ 1d8:	00 d0       	rcall	.+0      	; 0x1da <main+0x8>
+ 1da:	00 d0       	rcall	.+0      	; 0x1dc <main+0xa>
+ 1dc:	cd b7       	in	r28, 0x3d	; 61
+ 1de:	de b7       	in	r29, 0x3e	; 62
+asm volatile("sei"); //разрешаем глобальное прерывание
+ 1e0:	78 94       	sei
+#define baudrate 9600L
+#define bauddivider (F_CPU/(16*baudrate)-1)
+#define HI(x) ((x)>>8)
+#define LO(x) ((x)& 0xFF)
+
+UBRRL = LO(bauddivider);
+ 1e2:	89 e2       	ldi	r24, 0x29	; 41
+ 1e4:	90 e0       	ldi	r25, 0x00	; 0
+ 1e6:	27 e6       	ldi	r18, 0x67	; 103
+ 1e8:	fc 01       	movw	r30, r24
+ 1ea:	20 83       	st	Z, r18
+UBRRH = HI(bauddivider);
+ 1ec:	80 e4       	ldi	r24, 0x40	; 64
+ 1ee:	90 e0       	ldi	r25, 0x00	; 0
+ 1f0:	fc 01       	movw	r30, r24
+ 1f2:	10 82       	st	Z, r1
+UCSRA = 0;										// тут флаги состояния
+ 1f4:	8b e2       	ldi	r24, 0x2B	; 43
+ 1f6:	90 e0       	ldi	r25, 0x00	; 0
+ 1f8:	fc 01       	movw	r30, r24
+ 1fa:	10 82       	st	Z, r1
+UCSRB = 1<<RXEN|1<<TXEN|1<<RXCIE|0<<TXCIE;		// тут флаги управления 
+ 1fc:	8a e2       	ldi	r24, 0x2A	; 42
+ 1fe:	90 e0       	ldi	r25, 0x00	; 0
+ 200:	28 e9       	ldi	r18, 0x98	; 152
+ 202:	fc 01       	movw	r30, r24
+ 204:	20 83       	st	Z, r18
+UCSRC = 1<<URSEL|1<<UCSZ0|1<<UCSZ1;				// 8 бит
+ 206:	80 e4       	ldi	r24, 0x40	; 64
+ 208:	90 e0       	ldi	r25, 0x00	; 0
+ 20a:	26 e8       	ldi	r18, 0x86	; 134
+ 20c:	fc 01       	movw	r30, r24
+ 20e:	20 83       	st	Z, r18
+
+
+
+// инициализация таймера 0
+
+TIMSK = 1 << TOIE0; 							// запускаем нулевой таймер
+ 210:	89 e5       	ldi	r24, 0x59	; 89
+ 212:	90 e0       	ldi	r25, 0x00	; 0
+ 214:	21 e0       	ldi	r18, 0x01	; 1
+ 216:	fc 01       	movw	r30, r24
+ 218:	20 83       	st	Z, r18
+TCCR0 = (0<<CS02)|(1<<CS01)|(0<<CS00); 			// делитель частоты на 8.
+ 21a:	83 e5       	ldi	r24, 0x53	; 83
+ 21c:	90 e0       	ldi	r25, 0x00	; 0
+ 21e:	22 e0       	ldi	r18, 0x02	; 2
+ 220:	fc 01       	movw	r30, r24
+ 222:	20 83       	st	Z, r18
+*/
+
+
+// инициализация АЦП
+// 
+ADMUX = (0<<REFS1)|(1<<REFS0)|(0<<ADLAR)|(0<<MUX3)|(0<<MUX2)|(0<<MUX1)|(0<<MUX0);
+ 224:	87 e2       	ldi	r24, 0x27	; 39
+ 226:	90 e0       	ldi	r25, 0x00	; 0
+ 228:	20 e4       	ldi	r18, 0x40	; 64
+ 22a:	fc 01       	movw	r30, r24
+ 22c:	20 83       	st	Z, r18
+ADCSRA = (1<<ADEN)|(1<<ADIE)|(1<<ADSC)|(0<<ADATE)|(3<<ADPS0);
+ 22e:	86 e2       	ldi	r24, 0x26	; 38
+ 230:	90 e0       	ldi	r25, 0x00	; 0
+ 232:	2b ec       	ldi	r18, 0xCB	; 203
+ 234:	fc 01       	movw	r30, r24
+ 236:	20 83       	st	Z, r18
+
+
+
+// инициализация GPIO
+
+DDRA = 0x0;										// PortA на вход. Тут значения АЦП
+ 238:	8a e3       	ldi	r24, 0x3A	; 58
+ 23a:	90 e0       	ldi	r25, 0x00	; 0
+ 23c:	fc 01       	movw	r30, r24
+ 23e:	10 82       	st	Z, r1
+
+DDRD |= 1 << DDD2;								// управление импульсом и светодиодом на плате.
+ 240:	81 e3       	ldi	r24, 0x31	; 49
+ 242:	90 e0       	ldi	r25, 0x00	; 0
+ 244:	21 e3       	ldi	r18, 0x31	; 49
+ 246:	30 e0       	ldi	r19, 0x00	; 0
+ 248:	f9 01       	movw	r30, r18
+ 24a:	20 81       	ld	r18, Z
+ 24c:	24 60       	ori	r18, 0x04	; 4
+ 24e:	fc 01       	movw	r30, r24
+ 250:	20 83       	st	Z, r18
+PORTD &= ~(0 << PORTD2);						// зажгли для наглядности и отладки.
+ 252:	82 e3       	ldi	r24, 0x32	; 50
+ 254:	90 e0       	ldi	r25, 0x00	; 0
+ 256:	22 e3       	ldi	r18, 0x32	; 50
+ 258:	30 e0       	ldi	r19, 0x00	; 0
+ 25a:	f9 01       	movw	r30, r18
+ 25c:	20 81       	ld	r18, Z
+ 25e:	fc 01       	movw	r30, r24
+ 260:	20 83       	st	Z, r18
+DDRD |= 1 << DDD3;								// управление импульсом и светодиодом на плате.
+ 262:	81 e3       	ldi	r24, 0x31	; 49
+ 264:	90 e0       	ldi	r25, 0x00	; 0
+ 266:	21 e3       	ldi	r18, 0x31	; 49
+ 268:	30 e0       	ldi	r19, 0x00	; 0
+ 26a:	f9 01       	movw	r30, r18
+ 26c:	20 81       	ld	r18, Z
+ 26e:	28 60       	ori	r18, 0x08	; 8
+ 270:	fc 01       	movw	r30, r24
+ 272:	20 83       	st	Z, r18
+PORTD &= ~(0 << PORTD3);						// зажгли для наглядности и отладки.
+ 274:	82 e3       	ldi	r24, 0x32	; 50
+ 276:	90 e0       	ldi	r25, 0x00	; 0
+ 278:	22 e3       	ldi	r18, 0x32	; 50
+ 27a:	30 e0       	ldi	r19, 0x00	; 0
+ 27c:	f9 01       	movw	r30, r18
+ 27e:	20 81       	ld	r18, Z
+ 280:	fc 01       	movw	r30, r24
+ 282:	20 83       	st	Z, r18
+
+	for(;;) // бесконечный цикл
+	{
+
+
+		if (flag_UART_in == 1)					// проверка флага начала приёма. истина когда пришёл первый байт.
+ 284:	80 91 72 00 	lds	r24, 0x0072
+ 288:	81 30       	cpi	r24, 0x01	; 1
+ 28a:	79 f4       	brne	.+30     	; 0x2aa <main+0xd8>
+			{
+				if (count_timer0 >= 20)			// проверка на таймаут приёма. пока время не вышло ждём байты
+ 28c:	80 91 73 00 	lds	r24, 0x0073
+ 290:	84 31       	cpi	r24, 0x14	; 20
+ 292:	58 f0       	brcs	.+22     	; 0x2aa <main+0xd8>
+				{								// пока что тестовые 16 по 0,001041с каждый
+					flag_UART_in = 0;			// сбрасываем флаг начала приема, переходим к анализу принятого	
+ 294:	10 92 72 00 	sts	0x0072, r1
+					count_timer0 = 0;			// сбрасываем счётчик, чтоб знать сколько времени прошло после приёма
+ 298:	10 92 73 00 	sts	0x0073, r1
+					swith_modbas = 1;			// свич разбора полётов. что пришло, правильно и как жить дальше.
+ 29c:	81 e0       	ldi	r24, 0x01	; 1
+ 29e:	80 93 74 00 	sts	0x0074, r24
+					buffer_index = 0;				
+ 2a2:	10 92 7e 00 	sts	0x007E, r1
+ 2a6:	10 92 7d 00 	sts	0x007D, r1
+			} // скобка проверки флага начала приёма
+
+
+
+
+		switch (swith_modbas)
+ 2aa:	80 91 74 00 	lds	r24, 0x0074
+ 2ae:	88 2f       	mov	r24, r24
+ 2b0:	90 e0       	ldi	r25, 0x00	; 0
+ 2b2:	82 30       	cpi	r24, 0x02	; 2
+ 2b4:	91 05       	cpc	r25, r1
+ 2b6:	09 f4       	brne	.+2      	; 0x2ba <main+0xe8>
+ 2b8:	2e c4       	rjmp	.+2140   	; 0xb16 <__stack+0x6b7>
+ 2ba:	83 30       	cpi	r24, 0x03	; 3
+ 2bc:	91 05       	cpc	r25, r1
+ 2be:	09 f4       	brne	.+2      	; 0x2c2 <main+0xf0>
+ 2c0:	42 c4       	rjmp	.+2180   	; 0xb46 <__stack+0x6e7>
+ 2c2:	81 30       	cpi	r24, 0x01	; 1
+ 2c4:	91 05       	cpc	r25, r1
+ 2c6:	09 f0       	breq	.+2      	; 0x2ca <main+0xf8>
+ 2c8:	3f c4       	rjmp	.+2174   	; 0xb48 <__stack+0x6e9>
+			{
+
+				case 1:																// первый кейс разбирает принятый пакет по модбасу
+				{	
+					if (array_modbas_in[0] == adrr_devise) 							// проверка адреса устройства
+ 2ca:	80 91 0d 01 	lds	r24, 0x010D
+ 2ce:	90 91 0e 01 	lds	r25, 0x010E
+ 2d2:	82 30       	cpi	r24, 0x02	; 2
+ 2d4:	91 05       	cpc	r25, r1
+ 2d6:	09 f0       	breq	.+2      	; 0x2da <main+0x108>
+ 2d8:	17 c4       	rjmp	.+2094   	; 0xb08 <__stack+0x6a9>
+					{																// если адрес совпал, то смотрим что в пакете дальше
+						crc_calc = CRC16(array_modbas_in, (count_modbas_in-2));		// считаем CRC принятого пакета
+ 2da:	80 91 79 00 	lds	r24, 0x0079
+ 2de:	90 91 7a 00 	lds	r25, 0x007A
+ 2e2:	02 97       	sbiw	r24, 0x02	; 2
+ 2e4:	9c 01       	movw	r18, r24
+ 2e6:	8d e0       	ldi	r24, 0x0D	; 13
+ 2e8:	91 e0       	ldi	r25, 0x01	; 1
+ 2ea:	b9 01       	movw	r22, r18
+ 2ec:	0e 94 84 06 	call	0xd08	; 0xd08 <CRC16>
+ 2f0:	cc 01       	movw	r24, r24
+ 2f2:	a0 e0       	ldi	r26, 0x00	; 0
+ 2f4:	b0 e0       	ldi	r27, 0x00	; 0
+ 2f6:	80 93 f7 00 	sts	0x00F7, r24
+ 2fa:	90 93 f8 00 	sts	0x00F8, r25
+ 2fe:	a0 93 f9 00 	sts	0x00F9, r26
+ 302:	b0 93 fa 00 	sts	0x00FA, r27
+
+						crc_read_high = array_modbas_in[count_modbas_in-2]; 		// старший
+ 306:	80 91 79 00 	lds	r24, 0x0079
+ 30a:	90 91 7a 00 	lds	r25, 0x007A
+ 30e:	02 97       	sbiw	r24, 0x02	; 2
+ 310:	88 0f       	add	r24, r24
+ 312:	99 1f       	adc	r25, r25
+ 314:	83 5f       	subi	r24, 0xF3	; 243
+ 316:	9e 4f       	sbci	r25, 0xFE	; 254
+ 318:	fc 01       	movw	r30, r24
+ 31a:	80 81       	ld	r24, Z
+ 31c:	91 81       	ldd	r25, Z+1	; 0x01
+ 31e:	90 93 06 01 	sts	0x0106, r25
+ 322:	80 93 05 01 	sts	0x0105, r24
+						crc_read_low = array_modbas_in[count_modbas_in-1];			// младший
+ 326:	80 91 79 00 	lds	r24, 0x0079
+ 32a:	90 91 7a 00 	lds	r25, 0x007A
+ 32e:	01 97       	sbiw	r24, 0x01	; 1
+ 330:	88 0f       	add	r24, r24
+ 332:	99 1f       	adc	r25, r25
+ 334:	83 5f       	subi	r24, 0xF3	; 243
+ 336:	9e 4f       	sbci	r25, 0xFE	; 254
+ 338:	fc 01       	movw	r30, r24
+ 33a:	80 81       	ld	r24, Z
+ 33c:	91 81       	ldd	r25, Z+1	; 0x01
+ 33e:	90 93 04 01 	sts	0x0104, r25
+ 342:	80 93 03 01 	sts	0x0103, r24
+
+						crc_calc_low = ((crc_calc >> 8) & 0x00FF);					// младший (count_modbas_in+2)
+ 346:	80 91 f7 00 	lds	r24, 0x00F7
+ 34a:	90 91 f8 00 	lds	r25, 0x00F8
+ 34e:	a0 91 f9 00 	lds	r26, 0x00F9
+ 352:	b0 91 fa 00 	lds	r27, 0x00FA
+ 356:	89 2f       	mov	r24, r25
+ 358:	9a 2f       	mov	r25, r26
+ 35a:	ab 2f       	mov	r26, r27
+ 35c:	bb 27       	eor	r27, r27
+ 35e:	90 70       	andi	r25, 0x00	; 0
+ 360:	90 93 08 01 	sts	0x0108, r25
+ 364:	80 93 07 01 	sts	0x0107, r24
+						crc_calc_high = (crc_calc & 0x00FF);						// старший (count_modbas_in+1)
+ 368:	80 91 f7 00 	lds	r24, 0x00F7
+ 36c:	90 91 f8 00 	lds	r25, 0x00F8
+ 370:	a0 91 f9 00 	lds	r26, 0x00F9
+ 374:	b0 91 fa 00 	lds	r27, 0x00FA
+ 378:	90 70       	andi	r25, 0x00	; 0
+ 37a:	90 93 0a 01 	sts	0x010A, r25
+ 37e:	80 93 09 01 	sts	0x0109, r24
+						
+						
+						if((crc_read_low == crc_calc_low)&&(crc_read_high == crc_calc_high))// проверка соответствия контрольной суммы.
+ 382:	20 91 03 01 	lds	r18, 0x0103
+ 386:	30 91 04 01 	lds	r19, 0x0104
+ 38a:	80 91 07 01 	lds	r24, 0x0107
+ 38e:	90 91 08 01 	lds	r25, 0x0108
+ 392:	28 17       	cp	r18, r24
+ 394:	39 07       	cpc	r19, r25
+ 396:	09 f0       	breq	.+2      	; 0x39a <main+0x1c8>
+ 398:	a7 c3       	rjmp	.+1870   	; 0xae8 <__stack+0x689>
+ 39a:	20 91 05 01 	lds	r18, 0x0105
+ 39e:	30 91 06 01 	lds	r19, 0x0106
+ 3a2:	80 91 09 01 	lds	r24, 0x0109
+ 3a6:	90 91 0a 01 	lds	r25, 0x010A
+ 3aa:	28 17       	cp	r18, r24
+ 3ac:	39 07       	cpc	r19, r25
+ 3ae:	09 f0       	breq	.+2      	; 0x3b2 <main+0x1e0>
+ 3b0:	9b c3       	rjmp	.+1846   	; 0xae8 <__stack+0x689>
+						{															
+							
+							switch (array_modbas_in[1]) 	// свич определяет какая команда кроется в пакете.
+ 3b2:	80 91 0f 01 	lds	r24, 0x010F
+ 3b6:	90 91 10 01 	lds	r25, 0x0110
+ 3ba:	84 30       	cpi	r24, 0x04	; 4
+ 3bc:	91 05       	cpc	r25, r1
+ 3be:	09 f4       	brne	.+2      	; 0x3c2 <main+0x1f0>
+ 3c0:	88 c3       	rjmp	.+1808   	; 0xad2 <__stack+0x673>
+ 3c2:	85 30       	cpi	r24, 0x05	; 5
+ 3c4:	91 05       	cpc	r25, r1
+ 3c6:	2c f4       	brge	.+10     	; 0x3d2 <main+0x200>
+ 3c8:	83 30       	cpi	r24, 0x03	; 3
+ 3ca:	91 05       	cpc	r25, r1
+ 3cc:	09 f4       	brne	.+2      	; 0x3d0 <main+0x1fe>
+ 3ce:	e7 c1       	rjmp	.+974    	; 0x79e <__stack+0x33f>
+ 3d0:	81 c3       	rjmp	.+1794   	; 0xad4 <__stack+0x675>
+ 3d2:	86 30       	cpi	r24, 0x06	; 6
+ 3d4:	91 05       	cpc	r25, r1
+ 3d6:	29 f0       	breq	.+10     	; 0x3e2 <main+0x210>
+ 3d8:	80 31       	cpi	r24, 0x10	; 16
+ 3da:	91 05       	cpc	r25, r1
+ 3dc:	09 f4       	brne	.+2      	; 0x3e0 <main+0x20e>
+ 3de:	aa c0       	rjmp	.+340    	; 0x534 <__stack+0xd5>
+ 3e0:	79 c3       	rjmp	.+1778   	; 0xad4 <__stack+0x675>
+								{
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+									case 0x06:				// запись значения в один регистр хранения (Preset Single Register).
+									{
+										adrr_var = array_modbas_in[2];								// собераем адрес из массива в одну переменную
+ 3e2:	80 91 11 01 	lds	r24, 0x0111
+ 3e6:	90 91 12 01 	lds	r25, 0x0112
+ 3ea:	aa 27       	eor	r26, r26
+ 3ec:	97 fd       	sbrc	r25, 7
+ 3ee:	a0 95       	com	r26
+ 3f0:	ba 2f       	mov	r27, r26
+ 3f2:	80 93 fb 00 	sts	0x00FB, r24
+ 3f6:	90 93 fc 00 	sts	0x00FC, r25
+ 3fa:	a0 93 fd 00 	sts	0x00FD, r26
+ 3fe:	b0 93 fe 00 	sts	0x00FE, r27
+										adrr_var = ((adrr_var << 8) | array_modbas_in[3]);
+ 402:	80 91 fb 00 	lds	r24, 0x00FB
+ 406:	90 91 fc 00 	lds	r25, 0x00FC
+ 40a:	a0 91 fd 00 	lds	r26, 0x00FD
+ 40e:	b0 91 fe 00 	lds	r27, 0x00FE
+ 412:	22 27       	eor	r18, r18
+ 414:	38 2f       	mov	r19, r24
+ 416:	49 2f       	mov	r20, r25
+ 418:	5a 2f       	mov	r21, r26
+ 41a:	80 91 13 01 	lds	r24, 0x0113
+ 41e:	90 91 14 01 	lds	r25, 0x0114
+ 422:	aa 27       	eor	r26, r26
+ 424:	97 fd       	sbrc	r25, 7
+ 426:	a0 95       	com	r26
+ 428:	ba 2f       	mov	r27, r26
+ 42a:	82 2b       	or	r24, r18
+ 42c:	93 2b       	or	r25, r19
+ 42e:	a4 2b       	or	r26, r20
+ 430:	b5 2b       	or	r27, r21
+ 432:	80 93 fb 00 	sts	0x00FB, r24
+ 436:	90 93 fc 00 	sts	0x00FC, r25
+ 43a:	a0 93 fd 00 	sts	0x00FD, r26
+ 43e:	b0 93 fe 00 	sts	0x00FE, r27
+
+										if (adrr_var <= leth_array)									// проверка возможности записи по указанному адресу
+ 442:	80 91 fb 00 	lds	r24, 0x00FB
+ 446:	90 91 fc 00 	lds	r25, 0x00FC
+ 44a:	a0 91 fd 00 	lds	r26, 0x00FD
+ 44e:	b0 91 fe 00 	lds	r27, 0x00FE
+ 452:	8e 31       	cpi	r24, 0x1E	; 30
+ 454:	91 05       	cpc	r25, r1
+ 456:	a1 05       	cpc	r26, r1
+ 458:	b1 05       	cpc	r27, r1
+ 45a:	08 f0       	brcs	.+2      	; 0x45e <main+0x28c>
+ 45c:	64 c0       	rjmp	.+200    	; 0x526 <__stack+0xc7>
+										{
+											array_storage[adrr_var * 2] = array_modbas_in[4];		// пишем в массив для хранения полученое по сети слово
+ 45e:	80 91 fb 00 	lds	r24, 0x00FB
+ 462:	90 91 fc 00 	lds	r25, 0x00FC
+ 466:	a0 91 fd 00 	lds	r26, 0x00FD
+ 46a:	b0 91 fe 00 	lds	r27, 0x00FE
+ 46e:	88 0f       	add	r24, r24
+ 470:	99 1f       	adc	r25, r25
+ 472:	aa 1f       	adc	r26, r26
+ 474:	bb 1f       	adc	r27, r27
+ 476:	20 91 15 01 	lds	r18, 0x0115
+ 47a:	30 91 16 01 	lds	r19, 0x0116
+ 47e:	88 0f       	add	r24, r24
+ 480:	99 1f       	adc	r25, r25
+ 482:	8f 57       	subi	r24, 0x7F	; 127
+ 484:	9f 4f       	sbci	r25, 0xFF	; 255
+ 486:	fc 01       	movw	r30, r24
+ 488:	31 83       	std	Z+1, r19	; 0x01
+ 48a:	20 83       	st	Z, r18
+											array_storage[(adrr_var * 2)+1] = array_modbas_in[5];
+ 48c:	80 91 fb 00 	lds	r24, 0x00FB
+ 490:	90 91 fc 00 	lds	r25, 0x00FC
+ 494:	a0 91 fd 00 	lds	r26, 0x00FD
+ 498:	b0 91 fe 00 	lds	r27, 0x00FE
+ 49c:	88 0f       	add	r24, r24
+ 49e:	99 1f       	adc	r25, r25
+ 4a0:	aa 1f       	adc	r26, r26
+ 4a2:	bb 1f       	adc	r27, r27
+ 4a4:	01 96       	adiw	r24, 0x01	; 1
+ 4a6:	a1 1d       	adc	r26, r1
+ 4a8:	b1 1d       	adc	r27, r1
+ 4aa:	20 91 17 01 	lds	r18, 0x0117
+ 4ae:	30 91 18 01 	lds	r19, 0x0118
+ 4b2:	88 0f       	add	r24, r24
+ 4b4:	99 1f       	adc	r25, r25
+ 4b6:	8f 57       	subi	r24, 0x7F	; 127
+ 4b8:	9f 4f       	sbci	r25, 0xFF	; 255
+ 4ba:	fc 01       	movw	r30, r24
+ 4bc:	31 83       	std	Z+1, r19	; 0x01
+ 4be:	20 83       	st	Z, r18
+
+											for(int i = 0; i<= count_modbas_in; i++)				// скопируем масивы. так как ответ должен быть таким же как приёмный пакет.
+ 4c0:	1a 82       	std	Y+2, r1	; 0x02
+ 4c2:	19 82       	std	Y+1, r1	; 0x01
+ 4c4:	17 c0       	rjmp	.+46     	; 0x4f4 <__stack+0x95>
+											{
+												array_modbas_out[i] = array_modbas_in[i];
+ 4c6:	89 81       	ldd	r24, Y+1	; 0x01
+ 4c8:	9a 81       	ldd	r25, Y+2	; 0x02
+ 4ca:	88 0f       	add	r24, r24
+ 4cc:	99 1f       	adc	r25, r25
+ 4ce:	83 5f       	subi	r24, 0xF3	; 243
+ 4d0:	9e 4f       	sbci	r25, 0xFE	; 254
+ 4d2:	fc 01       	movw	r30, r24
+ 4d4:	20 81       	ld	r18, Z
+ 4d6:	31 81       	ldd	r19, Z+1	; 0x01
+ 4d8:	89 81       	ldd	r24, Y+1	; 0x01
+ 4da:	9a 81       	ldd	r25, Y+2	; 0x02
+ 4dc:	88 0f       	add	r24, r24
+ 4de:	99 1f       	adc	r25, r25
+ 4e0:	8b 57       	subi	r24, 0x7B	; 123
+ 4e2:	9e 4f       	sbci	r25, 0xFE	; 254
+ 4e4:	fc 01       	movw	r30, r24
+ 4e6:	31 83       	std	Z+1, r19	; 0x01
+ 4e8:	20 83       	st	Z, r18
+										if (adrr_var <= leth_array)									// проверка возможности записи по указанному адресу
+										{
+											array_storage[adrr_var * 2] = array_modbas_in[4];		// пишем в массив для хранения полученое по сети слово
+											array_storage[(adrr_var * 2)+1] = array_modbas_in[5];
+
+											for(int i = 0; i<= count_modbas_in; i++)				// скопируем масивы. так как ответ должен быть таким же как приёмный пакет.
+ 4ea:	89 81       	ldd	r24, Y+1	; 0x01
+ 4ec:	9a 81       	ldd	r25, Y+2	; 0x02
+ 4ee:	01 96       	adiw	r24, 0x01	; 1
+ 4f0:	9a 83       	std	Y+2, r25	; 0x02
+ 4f2:	89 83       	std	Y+1, r24	; 0x01
+ 4f4:	80 91 79 00 	lds	r24, 0x0079
+ 4f8:	90 91 7a 00 	lds	r25, 0x007A
+ 4fc:	29 81       	ldd	r18, Y+1	; 0x01
+ 4fe:	3a 81       	ldd	r19, Y+2	; 0x02
+ 500:	82 17       	cp	r24, r18
+ 502:	93 07       	cpc	r25, r19
+ 504:	04 f7       	brge	.-64     	; 0x4c6 <__stack+0x67>
+											{
+												array_modbas_out[i] = array_modbas_in[i];
+											}
+											
+											count_modbas_out = count_modbas_in;
+ 506:	80 91 79 00 	lds	r24, 0x0079
+ 50a:	90 91 7a 00 	lds	r25, 0x007A
+ 50e:	90 93 7c 00 	sts	0x007C, r25
+ 512:	80 93 7b 00 	sts	0x007B, r24
+											count_modbas_in = 0;
+ 516:	10 92 7a 00 	sts	0x007A, r1
+ 51a:	10 92 79 00 	sts	0x0079, r1
+											swith_modbas = 2; 										// переключаем на выполнение второго кейса
+ 51e:	82 e0       	ldi	r24, 0x02	; 2
+ 520:	80 93 74 00 	sts	0x0074, r24
+											count_modbas_in = 0;
+											swith_modbas = 0;
+										} // else скобка 
+
+									} // скобка команды 0х06
+									break;
+ 524:	d7 c2       	rjmp	.+1454   	; 0xad4 <__stack+0x675>
+											
+
+										} // скобка проверки адреса переменной
+										else 														// если адрес выходит за диапазон доступних, нужно записать код ошибки
+										{
+											count_modbas_in = 0;
+ 526:	10 92 7a 00 	sts	0x007A, r1
+ 52a:	10 92 79 00 	sts	0x0079, r1
+											swith_modbas = 0;
+ 52e:	10 92 74 00 	sts	0x0074, r1
+										} // else скобка 
+
+									} // скобка команды 0х06
+									break;
+ 532:	d0 c2       	rjmp	.+1440   	; 0xad4 <__stack+0x675>
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+									case 0x10:	// запись значений в несколько регистров хранения (Preset Multiple Registers)
+									{
+										adrr_var = array_modbas_in[2];								// собераем адрес из массива в одну переменную
+ 534:	80 91 11 01 	lds	r24, 0x0111
+ 538:	90 91 12 01 	lds	r25, 0x0112
+ 53c:	aa 27       	eor	r26, r26
+ 53e:	97 fd       	sbrc	r25, 7
+ 540:	a0 95       	com	r26
+ 542:	ba 2f       	mov	r27, r26
+ 544:	80 93 fb 00 	sts	0x00FB, r24
+ 548:	90 93 fc 00 	sts	0x00FC, r25
+ 54c:	a0 93 fd 00 	sts	0x00FD, r26
+ 550:	b0 93 fe 00 	sts	0x00FE, r27
+										adrr_var = ((adrr_var << 8) | array_modbas_in[3]);
+ 554:	80 91 fb 00 	lds	r24, 0x00FB
+ 558:	90 91 fc 00 	lds	r25, 0x00FC
+ 55c:	a0 91 fd 00 	lds	r26, 0x00FD
+ 560:	b0 91 fe 00 	lds	r27, 0x00FE
+ 564:	22 27       	eor	r18, r18
+ 566:	38 2f       	mov	r19, r24
+ 568:	49 2f       	mov	r20, r25
+ 56a:	5a 2f       	mov	r21, r26
+ 56c:	80 91 13 01 	lds	r24, 0x0113
+ 570:	90 91 14 01 	lds	r25, 0x0114
+ 574:	aa 27       	eor	r26, r26
+ 576:	97 fd       	sbrc	r25, 7
+ 578:	a0 95       	com	r26
+ 57a:	ba 2f       	mov	r27, r26
+ 57c:	82 2b       	or	r24, r18
+ 57e:	93 2b       	or	r25, r19
+ 580:	a4 2b       	or	r26, r20
+ 582:	b5 2b       	or	r27, r21
+ 584:	80 93 fb 00 	sts	0x00FB, r24
+ 588:	90 93 fc 00 	sts	0x00FC, r25
+ 58c:	a0 93 fd 00 	sts	0x00FD, r26
+ 590:	b0 93 fe 00 	sts	0x00FE, r27
+
+										if (array_modbas_in[5] == 2) 								// проверка кол-ва байт в слове. если не 2, то в лес такие пакеты, я не знаю как их обрабатывать, выходим с ошибкой
+ 594:	80 91 17 01 	lds	r24, 0x0117
+ 598:	90 91 18 01 	lds	r25, 0x0118
+ 59c:	82 30       	cpi	r24, 0x02	; 2
+ 59e:	91 05       	cpc	r25, r1
+ 5a0:	09 f0       	breq	.+2      	; 0x5a4 <__stack+0x145>
+ 5a2:	f6 c0       	rjmp	.+492    	; 0x790 <__stack+0x331>
+										{
+											if (adrr_var + (array_modbas_in[6]/2) <= leth_array)	// проверка возможности записи по указанному адресу
+ 5a4:	80 91 19 01 	lds	r24, 0x0119
+ 5a8:	90 91 1a 01 	lds	r25, 0x011A
+ 5ac:	99 23       	and	r25, r25
+ 5ae:	0c f4       	brge	.+2      	; 0x5b2 <__stack+0x153>
+ 5b0:	01 96       	adiw	r24, 0x01	; 1
+ 5b2:	95 95       	asr	r25
+ 5b4:	87 95       	ror	r24
+ 5b6:	9c 01       	movw	r18, r24
+ 5b8:	44 27       	eor	r20, r20
+ 5ba:	37 fd       	sbrc	r19, 7
+ 5bc:	40 95       	com	r20
+ 5be:	54 2f       	mov	r21, r20
+ 5c0:	80 91 fb 00 	lds	r24, 0x00FB
+ 5c4:	90 91 fc 00 	lds	r25, 0x00FC
+ 5c8:	a0 91 fd 00 	lds	r26, 0x00FD
+ 5cc:	b0 91 fe 00 	lds	r27, 0x00FE
+ 5d0:	82 0f       	add	r24, r18
+ 5d2:	93 1f       	adc	r25, r19
+ 5d4:	a4 1f       	adc	r26, r20
+ 5d6:	b5 1f       	adc	r27, r21
+ 5d8:	8e 31       	cpi	r24, 0x1E	; 30
+ 5da:	91 05       	cpc	r25, r1
+ 5dc:	a1 05       	cpc	r26, r1
+ 5de:	b1 05       	cpc	r27, r1
+ 5e0:	08 f0       	brcs	.+2      	; 0x5e4 <__stack+0x185>
+ 5e2:	cf c0       	rjmp	.+414    	; 0x782 <__stack+0x323>
+											{
+												adrr_var *= 2;
+ 5e4:	80 91 fb 00 	lds	r24, 0x00FB
+ 5e8:	90 91 fc 00 	lds	r25, 0x00FC
+ 5ec:	a0 91 fd 00 	lds	r26, 0x00FD
+ 5f0:	b0 91 fe 00 	lds	r27, 0x00FE
+ 5f4:	88 0f       	add	r24, r24
+ 5f6:	99 1f       	adc	r25, r25
+ 5f8:	aa 1f       	adc	r26, r26
+ 5fa:	bb 1f       	adc	r27, r27
+ 5fc:	80 93 fb 00 	sts	0x00FB, r24
+ 600:	90 93 fc 00 	sts	0x00FC, r25
+ 604:	a0 93 fd 00 	sts	0x00FD, r26
+ 608:	b0 93 fe 00 	sts	0x00FE, r27
+
+												for (int i =0; array_modbas_in[6] > i ; i++)
+ 60c:	1c 82       	std	Y+4, r1	; 0x04
+ 60e:	1b 82       	std	Y+3, r1	; 0x03
+ 610:	32 c0       	rjmp	.+100    	; 0x676 <__stack+0x217>
+												{
+													array_storage[adrr_var] = array_modbas_in[(7+i)];	//
+ 612:	80 91 fb 00 	lds	r24, 0x00FB
+ 616:	90 91 fc 00 	lds	r25, 0x00FC
+ 61a:	a0 91 fd 00 	lds	r26, 0x00FD
+ 61e:	b0 91 fe 00 	lds	r27, 0x00FE
+ 622:	2b 81       	ldd	r18, Y+3	; 0x03
+ 624:	3c 81       	ldd	r19, Y+4	; 0x04
+ 626:	29 5f       	subi	r18, 0xF9	; 249
+ 628:	3f 4f       	sbci	r19, 0xFF	; 255
+ 62a:	22 0f       	add	r18, r18
+ 62c:	33 1f       	adc	r19, r19
+ 62e:	23 5f       	subi	r18, 0xF3	; 243
+ 630:	3e 4f       	sbci	r19, 0xFE	; 254
+ 632:	f9 01       	movw	r30, r18
+ 634:	20 81       	ld	r18, Z
+ 636:	31 81       	ldd	r19, Z+1	; 0x01
+ 638:	88 0f       	add	r24, r24
+ 63a:	99 1f       	adc	r25, r25
+ 63c:	8f 57       	subi	r24, 0x7F	; 127
+ 63e:	9f 4f       	sbci	r25, 0xFF	; 255
+ 640:	fc 01       	movw	r30, r24
+ 642:	31 83       	std	Z+1, r19	; 0x01
+ 644:	20 83       	st	Z, r18
+													adrr_var++;
+ 646:	80 91 fb 00 	lds	r24, 0x00FB
+ 64a:	90 91 fc 00 	lds	r25, 0x00FC
+ 64e:	a0 91 fd 00 	lds	r26, 0x00FD
+ 652:	b0 91 fe 00 	lds	r27, 0x00FE
+ 656:	01 96       	adiw	r24, 0x01	; 1
+ 658:	a1 1d       	adc	r26, r1
+ 65a:	b1 1d       	adc	r27, r1
+ 65c:	80 93 fb 00 	sts	0x00FB, r24
+ 660:	90 93 fc 00 	sts	0x00FC, r25
+ 664:	a0 93 fd 00 	sts	0x00FD, r26
+ 668:	b0 93 fe 00 	sts	0x00FE, r27
+										{
+											if (adrr_var + (array_modbas_in[6]/2) <= leth_array)	// проверка возможности записи по указанному адресу
+											{
+												adrr_var *= 2;
+
+												for (int i =0; array_modbas_in[6] > i ; i++)
+ 66c:	8b 81       	ldd	r24, Y+3	; 0x03
+ 66e:	9c 81       	ldd	r25, Y+4	; 0x04
+ 670:	01 96       	adiw	r24, 0x01	; 1
+ 672:	9c 83       	std	Y+4, r25	; 0x04
+ 674:	8b 83       	std	Y+3, r24	; 0x03
+ 676:	20 91 19 01 	lds	r18, 0x0119
+ 67a:	30 91 1a 01 	lds	r19, 0x011A
+ 67e:	8b 81       	ldd	r24, Y+3	; 0x03
+ 680:	9c 81       	ldd	r25, Y+4	; 0x04
+ 682:	82 17       	cp	r24, r18
+ 684:	93 07       	cpc	r25, r19
+ 686:	2c f2       	brlt	.-118    	; 0x612 <__stack+0x1b3>
+													array_storage[adrr_var] = array_modbas_in[(7+i)];	//
+													adrr_var++;
+												} // скобка цикла
+
+
+												array_modbas_out[0] = array_modbas_in[0];
+ 688:	80 91 0d 01 	lds	r24, 0x010D
+ 68c:	90 91 0e 01 	lds	r25, 0x010E
+ 690:	90 93 86 01 	sts	0x0186, r25
+ 694:	80 93 85 01 	sts	0x0185, r24
+												array_modbas_out[1] = array_modbas_in[1];
+ 698:	80 91 0f 01 	lds	r24, 0x010F
+ 69c:	90 91 10 01 	lds	r25, 0x0110
+ 6a0:	90 93 88 01 	sts	0x0188, r25
+ 6a4:	80 93 87 01 	sts	0x0187, r24
+												array_modbas_out[2] = array_modbas_in[2];
+ 6a8:	80 91 11 01 	lds	r24, 0x0111
+ 6ac:	90 91 12 01 	lds	r25, 0x0112
+ 6b0:	90 93 8a 01 	sts	0x018A, r25
+ 6b4:	80 93 89 01 	sts	0x0189, r24
+												array_modbas_out[3] = array_modbas_in[3];
+ 6b8:	80 91 13 01 	lds	r24, 0x0113
+ 6bc:	90 91 14 01 	lds	r25, 0x0114
+ 6c0:	90 93 8c 01 	sts	0x018C, r25
+ 6c4:	80 93 8b 01 	sts	0x018B, r24
+												array_modbas_out[4] = array_modbas_in[4];
+ 6c8:	80 91 15 01 	lds	r24, 0x0115
+ 6cc:	90 91 16 01 	lds	r25, 0x0116
+ 6d0:	90 93 8e 01 	sts	0x018E, r25
+ 6d4:	80 93 8d 01 	sts	0x018D, r24
+												array_modbas_out[5] = array_modbas_in[5];
+ 6d8:	80 91 17 01 	lds	r24, 0x0117
+ 6dc:	90 91 18 01 	lds	r25, 0x0118
+ 6e0:	90 93 90 01 	sts	0x0190, r25
+ 6e4:	80 93 8f 01 	sts	0x018F, r24
+
+
+												crc_calc = CRC16(array_modbas_out, 6);				// считаем CRC отправляемого пакета, 3 точно известных байта и байты считанные , зависит от колва в переменной
+ 6e8:	85 e8       	ldi	r24, 0x85	; 133
+ 6ea:	91 e0       	ldi	r25, 0x01	; 1
+ 6ec:	66 e0       	ldi	r22, 0x06	; 6
+ 6ee:	70 e0       	ldi	r23, 0x00	; 0
+ 6f0:	0e 94 84 06 	call	0xd08	; 0xd08 <CRC16>
+ 6f4:	cc 01       	movw	r24, r24
+ 6f6:	a0 e0       	ldi	r26, 0x00	; 0
+ 6f8:	b0 e0       	ldi	r27, 0x00	; 0
+ 6fa:	80 93 f7 00 	sts	0x00F7, r24
+ 6fe:	90 93 f8 00 	sts	0x00F8, r25
+ 702:	a0 93 f9 00 	sts	0x00F9, r26
+ 706:	b0 93 fa 00 	sts	0x00FA, r27
+
+												crc_calc_low = ((crc_calc >> 8) & 0x00FF);			// младший (count_modbas_in+2)
+ 70a:	80 91 f7 00 	lds	r24, 0x00F7
+ 70e:	90 91 f8 00 	lds	r25, 0x00F8
+ 712:	a0 91 f9 00 	lds	r26, 0x00F9
+ 716:	b0 91 fa 00 	lds	r27, 0x00FA
+ 71a:	89 2f       	mov	r24, r25
+ 71c:	9a 2f       	mov	r25, r26
+ 71e:	ab 2f       	mov	r26, r27
+ 720:	bb 27       	eor	r27, r27
+ 722:	90 70       	andi	r25, 0x00	; 0
+ 724:	90 93 08 01 	sts	0x0108, r25
+ 728:	80 93 07 01 	sts	0x0107, r24
+												crc_calc_high = (crc_calc & 0x00FF);				// старший (count_modbas_in+1)
+ 72c:	80 91 f7 00 	lds	r24, 0x00F7
+ 730:	90 91 f8 00 	lds	r25, 0x00F8
+ 734:	a0 91 f9 00 	lds	r26, 0x00F9
+ 738:	b0 91 fa 00 	lds	r27, 0x00FA
+ 73c:	90 70       	andi	r25, 0x00	; 0
+ 73e:	90 93 0a 01 	sts	0x010A, r25
+ 742:	80 93 09 01 	sts	0x0109, r24
+
+												array_modbas_out[6] = crc_calc_high;				// посчитаная контролька, пишем в массив для отправки
+ 746:	80 91 09 01 	lds	r24, 0x0109
+ 74a:	90 91 0a 01 	lds	r25, 0x010A
+ 74e:	90 93 92 01 	sts	0x0192, r25
+ 752:	80 93 91 01 	sts	0x0191, r24
+												array_modbas_out[7] = crc_calc_low;													
+ 756:	80 91 07 01 	lds	r24, 0x0107
+ 75a:	90 91 08 01 	lds	r25, 0x0108
+ 75e:	90 93 94 01 	sts	0x0194, r25
+ 762:	80 93 93 01 	sts	0x0193, r24
+												
+
+												count_modbas_out = 8;								// ответ всегда равен 8 байт
+ 766:	88 e0       	ldi	r24, 0x08	; 8
+ 768:	90 e0       	ldi	r25, 0x00	; 0
+ 76a:	90 93 7c 00 	sts	0x007C, r25
+ 76e:	80 93 7b 00 	sts	0x007B, r24
+												count_modbas_in = 0;
+ 772:	10 92 7a 00 	sts	0x007A, r1
+ 776:	10 92 79 00 	sts	0x0079, r1
+												swith_modbas = 2; 	
+ 77a:	82 e0       	ldi	r24, 0x02	; 2
+ 77c:	80 93 74 00 	sts	0x0074, r24
+											count_modbas_in = 0;
+											swith_modbas = 0;
+										} // скобочка else проверки сколько байт в слове
+
+									} // скобка команды 0х10
+									break;
+ 780:	a9 c1       	rjmp	.+850    	; 0xad4 <__stack+0x675>
+												count_modbas_in = 0;
+												swith_modbas = 2; 	
+											} // скобка проверки адреса переменных
+											else
+											{
+												count_modbas_in = 0;
+ 782:	10 92 7a 00 	sts	0x007A, r1
+ 786:	10 92 79 00 	sts	0x0079, r1
+												swith_modbas = 0;
+ 78a:	10 92 74 00 	sts	0x0074, r1
+											count_modbas_in = 0;
+											swith_modbas = 0;
+										} // скобочка else проверки сколько байт в слове
+
+									} // скобка команды 0х10
+									break;
+ 78e:	a2 c1       	rjmp	.+836    	; 0xad4 <__stack+0x675>
+												swith_modbas = 0;
+											} // else скобка проверки адреса переменных
+										} // скобочка проверки сколько байт в слове.
+										else
+										{
+											count_modbas_in = 0;
+ 790:	10 92 7a 00 	sts	0x007A, r1
+ 794:	10 92 79 00 	sts	0x0079, r1
+											swith_modbas = 0;
+ 798:	10 92 74 00 	sts	0x0074, r1
+										} // скобочка else проверки сколько байт в слове
+
+									} // скобка команды 0х10
+									break;
+ 79c:	9b c1       	rjmp	.+822    	; 0xad4 <__stack+0x675>
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+									case 0x03:				// чтение значений из нескольких регистров хранения (Read Holding Registers).
+									{
+										adrr_var = array_modbas_in[2];										// собераем адрес из массива в одну переменную
+ 79e:	80 91 11 01 	lds	r24, 0x0111
+ 7a2:	90 91 12 01 	lds	r25, 0x0112
+ 7a6:	aa 27       	eor	r26, r26
+ 7a8:	97 fd       	sbrc	r25, 7
+ 7aa:	a0 95       	com	r26
+ 7ac:	ba 2f       	mov	r27, r26
+ 7ae:	80 93 fb 00 	sts	0x00FB, r24
+ 7b2:	90 93 fc 00 	sts	0x00FC, r25
+ 7b6:	a0 93 fd 00 	sts	0x00FD, r26
+ 7ba:	b0 93 fe 00 	sts	0x00FE, r27
+										adrr_var = ((adrr_var << 8) | array_modbas_in[3]);
+ 7be:	80 91 fb 00 	lds	r24, 0x00FB
+ 7c2:	90 91 fc 00 	lds	r25, 0x00FC
+ 7c6:	a0 91 fd 00 	lds	r26, 0x00FD
+ 7ca:	b0 91 fe 00 	lds	r27, 0x00FE
+ 7ce:	22 27       	eor	r18, r18
+ 7d0:	38 2f       	mov	r19, r24
+ 7d2:	49 2f       	mov	r20, r25
+ 7d4:	5a 2f       	mov	r21, r26
+ 7d6:	80 91 13 01 	lds	r24, 0x0113
+ 7da:	90 91 14 01 	lds	r25, 0x0114
+ 7de:	aa 27       	eor	r26, r26
+ 7e0:	97 fd       	sbrc	r25, 7
+ 7e2:	a0 95       	com	r26
+ 7e4:	ba 2f       	mov	r27, r26
+ 7e6:	82 2b       	or	r24, r18
+ 7e8:	93 2b       	or	r25, r19
+ 7ea:	a4 2b       	or	r26, r20
+ 7ec:	b5 2b       	or	r27, r21
+ 7ee:	80 93 fb 00 	sts	0x00FB, r24
+ 7f2:	90 93 fc 00 	sts	0x00FC, r25
+ 7f6:	a0 93 fd 00 	sts	0x00FD, r26
+ 7fa:	b0 93 fe 00 	sts	0x00FE, r27
+
+										quantity_byte = array_modbas_in[4];
+ 7fe:	80 91 15 01 	lds	r24, 0x0115
+ 802:	90 91 16 01 	lds	r25, 0x0116
+ 806:	aa 27       	eor	r26, r26
+ 808:	97 fd       	sbrc	r25, 7
+ 80a:	a0 95       	com	r26
+ 80c:	ba 2f       	mov	r27, r26
+ 80e:	80 93 ff 00 	sts	0x00FF, r24
+ 812:	90 93 00 01 	sts	0x0100, r25
+ 816:	a0 93 01 01 	sts	0x0101, r26
+ 81a:	b0 93 02 01 	sts	0x0102, r27
+										quantity_byte = ((quantity_byte << 8) | array_modbas_in[5]);		// соберём кол-во байт, которое нужно прочитать
+ 81e:	80 91 ff 00 	lds	r24, 0x00FF
+ 822:	90 91 00 01 	lds	r25, 0x0100
+ 826:	a0 91 01 01 	lds	r26, 0x0101
+ 82a:	b0 91 02 01 	lds	r27, 0x0102
+ 82e:	22 27       	eor	r18, r18
+ 830:	38 2f       	mov	r19, r24
+ 832:	49 2f       	mov	r20, r25
+ 834:	5a 2f       	mov	r21, r26
+ 836:	80 91 17 01 	lds	r24, 0x0117
+ 83a:	90 91 18 01 	lds	r25, 0x0118
+ 83e:	aa 27       	eor	r26, r26
+ 840:	97 fd       	sbrc	r25, 7
+ 842:	a0 95       	com	r26
+ 844:	ba 2f       	mov	r27, r26
+ 846:	82 2b       	or	r24, r18
+ 848:	93 2b       	or	r25, r19
+ 84a:	a4 2b       	or	r26, r20
+ 84c:	b5 2b       	or	r27, r21
+ 84e:	80 93 ff 00 	sts	0x00FF, r24
+ 852:	90 93 00 01 	sts	0x0100, r25
+ 856:	a0 93 01 01 	sts	0x0101, r26
+ 85a:	b0 93 02 01 	sts	0x0102, r27
+
+
+										if ((adrr_var <= leth_array) || ((adrr_var + quantity_byte) <= leth_array))	// проверка возможности чтения данных по указанному адресу.
+ 85e:	80 91 fb 00 	lds	r24, 0x00FB
+ 862:	90 91 fc 00 	lds	r25, 0x00FC
+ 866:	a0 91 fd 00 	lds	r26, 0x00FD
+ 86a:	b0 91 fe 00 	lds	r27, 0x00FE
+ 86e:	8e 31       	cpi	r24, 0x1E	; 30
+ 870:	91 05       	cpc	r25, r1
+ 872:	a1 05       	cpc	r26, r1
+ 874:	b1 05       	cpc	r27, r1
+ 876:	d0 f0       	brcs	.+52     	; 0x8ac <__stack+0x44d>
+ 878:	20 91 fb 00 	lds	r18, 0x00FB
+ 87c:	30 91 fc 00 	lds	r19, 0x00FC
+ 880:	40 91 fd 00 	lds	r20, 0x00FD
+ 884:	50 91 fe 00 	lds	r21, 0x00FE
+ 888:	80 91 ff 00 	lds	r24, 0x00FF
+ 88c:	90 91 00 01 	lds	r25, 0x0100
+ 890:	a0 91 01 01 	lds	r26, 0x0101
+ 894:	b0 91 02 01 	lds	r27, 0x0102
+ 898:	82 0f       	add	r24, r18
+ 89a:	93 1f       	adc	r25, r19
+ 89c:	a4 1f       	adc	r26, r20
+ 89e:	b5 1f       	adc	r27, r21
+ 8a0:	8e 31       	cpi	r24, 0x1E	; 30
+ 8a2:	91 05       	cpc	r25, r1
+ 8a4:	a1 05       	cpc	r26, r1
+ 8a6:	b1 05       	cpc	r27, r1
+ 8a8:	08 f0       	brcs	.+2      	; 0x8ac <__stack+0x44d>
+ 8aa:	0c c1       	rjmp	.+536    	; 0xac4 <__stack+0x665>
+										{
+											array_modbas_out[0] = array_modbas_in[0];						// адрес слейва, который отвечает на запрос
+ 8ac:	80 91 0d 01 	lds	r24, 0x010D
+ 8b0:	90 91 0e 01 	lds	r25, 0x010E
+ 8b4:	90 93 86 01 	sts	0x0186, r25
+ 8b8:	80 93 85 01 	sts	0x0185, r24
+											array_modbas_out[1] = array_modbas_in[1];						// код команды, на которую отвечает слейв (0х3 конкретно в этом случае)
+ 8bc:	80 91 0f 01 	lds	r24, 0x010F
+ 8c0:	90 91 10 01 	lds	r25, 0x0110
+ 8c4:	90 93 88 01 	sts	0x0188, r25
+ 8c8:	80 93 87 01 	sts	0x0187, r24
+											array_modbas_out[2] = quantity_byte * 2;						// колличество байт, которые передаём. переменная 2 байта, верх срежется, поэтому не можем разом в один пакет записать более 255-ти байт
+ 8cc:	80 91 ff 00 	lds	r24, 0x00FF
+ 8d0:	90 91 00 01 	lds	r25, 0x0100
+ 8d4:	a0 91 01 01 	lds	r26, 0x0101
+ 8d8:	b0 91 02 01 	lds	r27, 0x0102
+ 8dc:	88 0f       	add	r24, r24
+ 8de:	99 1f       	adc	r25, r25
+ 8e0:	90 93 8a 01 	sts	0x018A, r25
+ 8e4:	80 93 89 01 	sts	0x0189, r24
+
+											adrr_var *= 2;													// слова у нас двух байтные, чтобы указать на адрес в массиве, умножаем на два (для счётчика)
+ 8e8:	80 91 fb 00 	lds	r24, 0x00FB
+ 8ec:	90 91 fc 00 	lds	r25, 0x00FC
+ 8f0:	a0 91 fd 00 	lds	r26, 0x00FD
+ 8f4:	b0 91 fe 00 	lds	r27, 0x00FE
+ 8f8:	88 0f       	add	r24, r24
+ 8fa:	99 1f       	adc	r25, r25
+ 8fc:	aa 1f       	adc	r26, r26
+ 8fe:	bb 1f       	adc	r27, r27
+ 900:	80 93 fb 00 	sts	0x00FB, r24
+ 904:	90 93 fc 00 	sts	0x00FC, r25
+ 908:	a0 93 fd 00 	sts	0x00FD, r26
+ 90c:	b0 93 fe 00 	sts	0x00FE, r27
+											quantity_byte *= 2;
+ 910:	80 91 ff 00 	lds	r24, 0x00FF
+ 914:	90 91 00 01 	lds	r25, 0x0100
+ 918:	a0 91 01 01 	lds	r26, 0x0101
+ 91c:	b0 91 02 01 	lds	r27, 0x0102
+ 920:	88 0f       	add	r24, r24
+ 922:	99 1f       	adc	r25, r25
+ 924:	aa 1f       	adc	r26, r26
+ 926:	bb 1f       	adc	r27, r27
+ 928:	80 93 ff 00 	sts	0x00FF, r24
+ 92c:	90 93 00 01 	sts	0x0100, r25
+ 930:	a0 93 01 01 	sts	0x0101, r26
+ 934:	b0 93 02 01 	sts	0x0102, r27
+
+											for (int i = 0; i <= quantity_byte; i++)
+ 938:	1e 82       	std	Y+6, r1	; 0x06
+ 93a:	1d 82       	std	Y+5, r1	; 0x05
+ 93c:	34 c0       	rjmp	.+104    	; 0x9a6 <__stack+0x547>
+											{
+												array_modbas_out[i+3] = array_storage[adrr_var];			// читаем из массива хранения в сеть по указанному адресу
+ 93e:	8d 81       	ldd	r24, Y+5	; 0x05
+ 940:	9e 81       	ldd	r25, Y+6	; 0x06
+ 942:	ac 01       	movw	r20, r24
+ 944:	4d 5f       	subi	r20, 0xFD	; 253
+ 946:	5f 4f       	sbci	r21, 0xFF	; 255
+ 948:	80 91 fb 00 	lds	r24, 0x00FB
+ 94c:	90 91 fc 00 	lds	r25, 0x00FC
+ 950:	a0 91 fd 00 	lds	r26, 0x00FD
+ 954:	b0 91 fe 00 	lds	r27, 0x00FE
+ 958:	88 0f       	add	r24, r24
+ 95a:	99 1f       	adc	r25, r25
+ 95c:	8f 57       	subi	r24, 0x7F	; 127
+ 95e:	9f 4f       	sbci	r25, 0xFF	; 255
+ 960:	fc 01       	movw	r30, r24
+ 962:	20 81       	ld	r18, Z
+ 964:	31 81       	ldd	r19, Z+1	; 0x01
+ 966:	ca 01       	movw	r24, r20
+ 968:	88 0f       	add	r24, r24
+ 96a:	99 1f       	adc	r25, r25
+ 96c:	8b 57       	subi	r24, 0x7B	; 123
+ 96e:	9e 4f       	sbci	r25, 0xFE	; 254
+ 970:	fc 01       	movw	r30, r24
+ 972:	31 83       	std	Z+1, r19	; 0x01
+ 974:	20 83       	st	Z, r18
+												adrr_var++;
+ 976:	80 91 fb 00 	lds	r24, 0x00FB
+ 97a:	90 91 fc 00 	lds	r25, 0x00FC
+ 97e:	a0 91 fd 00 	lds	r26, 0x00FD
+ 982:	b0 91 fe 00 	lds	r27, 0x00FE
+ 986:	01 96       	adiw	r24, 0x01	; 1
+ 988:	a1 1d       	adc	r26, r1
+ 98a:	b1 1d       	adc	r27, r1
+ 98c:	80 93 fb 00 	sts	0x00FB, r24
+ 990:	90 93 fc 00 	sts	0x00FC, r25
+ 994:	a0 93 fd 00 	sts	0x00FD, r26
+ 998:	b0 93 fe 00 	sts	0x00FE, r27
+											array_modbas_out[2] = quantity_byte * 2;						// колличество байт, которые передаём. переменная 2 байта, верх срежется, поэтому не можем разом в один пакет записать более 255-ти байт
+
+											adrr_var *= 2;													// слова у нас двух байтные, чтобы указать на адрес в массиве, умножаем на два (для счётчика)
+											quantity_byte *= 2;
+
+											for (int i = 0; i <= quantity_byte; i++)
+ 99c:	8d 81       	ldd	r24, Y+5	; 0x05
+ 99e:	9e 81       	ldd	r25, Y+6	; 0x06
+ 9a0:	01 96       	adiw	r24, 0x01	; 1
+ 9a2:	9e 83       	std	Y+6, r25	; 0x06
+ 9a4:	8d 83       	std	Y+5, r24	; 0x05
+ 9a6:	8d 81       	ldd	r24, Y+5	; 0x05
+ 9a8:	9e 81       	ldd	r25, Y+6	; 0x06
+ 9aa:	9c 01       	movw	r18, r24
+ 9ac:	44 27       	eor	r20, r20
+ 9ae:	37 fd       	sbrc	r19, 7
+ 9b0:	40 95       	com	r20
+ 9b2:	54 2f       	mov	r21, r20
+ 9b4:	80 91 ff 00 	lds	r24, 0x00FF
+ 9b8:	90 91 00 01 	lds	r25, 0x0100
+ 9bc:	a0 91 01 01 	lds	r26, 0x0101
+ 9c0:	b0 91 02 01 	lds	r27, 0x0102
+ 9c4:	82 17       	cp	r24, r18
+ 9c6:	93 07       	cpc	r25, r19
+ 9c8:	a4 07       	cpc	r26, r20
+ 9ca:	b5 07       	cpc	r27, r21
+ 9cc:	08 f0       	brcs	.+2      	; 0x9d0 <__stack+0x571>
+ 9ce:	b7 cf       	rjmp	.-146    	; 0x93e <__stack+0x4df>
+												adrr_var++;
+											}
+
+																											// в слове по два байта
+
+											crc_calc = CRC16(array_modbas_out, (quantity_byte + 3));		// считаем CRC отправляемого пакета, 3 точно известных байта и байты считанные , зависит от колва в переменной
+ 9d0:	80 91 ff 00 	lds	r24, 0x00FF
+ 9d4:	90 91 00 01 	lds	r25, 0x0100
+ 9d8:	a0 91 01 01 	lds	r26, 0x0101
+ 9dc:	b0 91 02 01 	lds	r27, 0x0102
+ 9e0:	9c 01       	movw	r18, r24
+ 9e2:	2d 5f       	subi	r18, 0xFD	; 253
+ 9e4:	3f 4f       	sbci	r19, 0xFF	; 255
+ 9e6:	85 e8       	ldi	r24, 0x85	; 133
+ 9e8:	91 e0       	ldi	r25, 0x01	; 1
+ 9ea:	b9 01       	movw	r22, r18
+ 9ec:	0e 94 84 06 	call	0xd08	; 0xd08 <CRC16>
+ 9f0:	cc 01       	movw	r24, r24
+ 9f2:	a0 e0       	ldi	r26, 0x00	; 0
+ 9f4:	b0 e0       	ldi	r27, 0x00	; 0
+ 9f6:	80 93 f7 00 	sts	0x00F7, r24
+ 9fa:	90 93 f8 00 	sts	0x00F8, r25
+ 9fe:	a0 93 f9 00 	sts	0x00F9, r26
+ a02:	b0 93 fa 00 	sts	0x00FA, r27
+
+											crc_calc_low = ((crc_calc >> 8) & 0x00FF);						// младший (count_modbas_in+2)
+ a06:	80 91 f7 00 	lds	r24, 0x00F7
+ a0a:	90 91 f8 00 	lds	r25, 0x00F8
+ a0e:	a0 91 f9 00 	lds	r26, 0x00F9
+ a12:	b0 91 fa 00 	lds	r27, 0x00FA
+ a16:	89 2f       	mov	r24, r25
+ a18:	9a 2f       	mov	r25, r26
+ a1a:	ab 2f       	mov	r26, r27
+ a1c:	bb 27       	eor	r27, r27
+ a1e:	90 70       	andi	r25, 0x00	; 0
+ a20:	90 93 08 01 	sts	0x0108, r25
+ a24:	80 93 07 01 	sts	0x0107, r24
+											crc_calc_high = (crc_calc & 0x00FF);							// старший (count_modbas_in+1)
+ a28:	80 91 f7 00 	lds	r24, 0x00F7
+ a2c:	90 91 f8 00 	lds	r25, 0x00F8
+ a30:	a0 91 f9 00 	lds	r26, 0x00F9
+ a34:	b0 91 fa 00 	lds	r27, 0x00FA
+ a38:	90 70       	andi	r25, 0x00	; 0
+ a3a:	90 93 0a 01 	sts	0x010A, r25
+ a3e:	80 93 09 01 	sts	0x0109, r24
+
+											array_modbas_out[(quantity_byte + 3)] = crc_calc_high;			// посчитаная контролька, пишем в массив для отправки
+ a42:	80 91 ff 00 	lds	r24, 0x00FF
+ a46:	90 91 00 01 	lds	r25, 0x0100
+ a4a:	a0 91 01 01 	lds	r26, 0x0101
+ a4e:	b0 91 02 01 	lds	r27, 0x0102
+ a52:	03 96       	adiw	r24, 0x03	; 3
+ a54:	a1 1d       	adc	r26, r1
+ a56:	b1 1d       	adc	r27, r1
+ a58:	20 91 09 01 	lds	r18, 0x0109
+ a5c:	30 91 0a 01 	lds	r19, 0x010A
+ a60:	88 0f       	add	r24, r24
+ a62:	99 1f       	adc	r25, r25
+ a64:	8b 57       	subi	r24, 0x7B	; 123
+ a66:	9e 4f       	sbci	r25, 0xFE	; 254
+ a68:	fc 01       	movw	r30, r24
+ a6a:	31 83       	std	Z+1, r19	; 0x01
+ a6c:	20 83       	st	Z, r18
+											array_modbas_out[(quantity_byte + 3)+1] = crc_calc_low;			// 
+ a6e:	80 91 ff 00 	lds	r24, 0x00FF
+ a72:	90 91 00 01 	lds	r25, 0x0100
+ a76:	a0 91 01 01 	lds	r26, 0x0101
+ a7a:	b0 91 02 01 	lds	r27, 0x0102
+ a7e:	04 96       	adiw	r24, 0x04	; 4
+ a80:	a1 1d       	adc	r26, r1
+ a82:	b1 1d       	adc	r27, r1
+ a84:	20 91 07 01 	lds	r18, 0x0107
+ a88:	30 91 08 01 	lds	r19, 0x0108
+ a8c:	88 0f       	add	r24, r24
+ a8e:	99 1f       	adc	r25, r25
+ a90:	8b 57       	subi	r24, 0x7B	; 123
+ a92:	9e 4f       	sbci	r25, 0xFE	; 254
+ a94:	fc 01       	movw	r30, r24
+ a96:	31 83       	std	Z+1, r19	; 0x01
+ a98:	20 83       	st	Z, r18
+
+											count_modbas_out = (quantity_byte + 3)+2;
+ a9a:	80 91 ff 00 	lds	r24, 0x00FF
+ a9e:	90 91 00 01 	lds	r25, 0x0100
+ aa2:	a0 91 01 01 	lds	r26, 0x0101
+ aa6:	b0 91 02 01 	lds	r27, 0x0102
+ aaa:	05 96       	adiw	r24, 0x05	; 5
+ aac:	90 93 7c 00 	sts	0x007C, r25
+ ab0:	80 93 7b 00 	sts	0x007B, r24
+											count_modbas_in = 0;
+ ab4:	10 92 7a 00 	sts	0x007A, r1
+ ab8:	10 92 79 00 	sts	0x0079, r1
+											swith_modbas = 2; 			// переключаем на выполнение второго кейса
+ abc:	82 e0       	ldi	r24, 0x02	; 2
+ abe:	80 93 74 00 	sts	0x0074, r24
+										{
+											count_modbas_in = 0;
+											swith_modbas = 0;
+										} // else скобка
+									} // скобка команды 0х03
+									break;
+ ac2:	08 c0       	rjmp	.+16     	; 0xad4 <__stack+0x675>
+											swith_modbas = 2; 			// переключаем на выполнение второго кейса
+
+										} // скобка проверки адреса переменной
+										else // если адрес выходит за диапазон доступних, нужно записать код ошибки
+										{
+											count_modbas_in = 0;
+ ac4:	10 92 7a 00 	sts	0x007A, r1
+ ac8:	10 92 79 00 	sts	0x0079, r1
+											swith_modbas = 0;
+ acc:	10 92 74 00 	sts	0x0074, r1
+										} // else скобка
+									} // скобка команды 0х03
+									break;
+ ad0:	01 c0       	rjmp	.+2      	; 0xad4 <__stack+0x675>
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+									case 0x04:				// чтение значений из нескольких регистров ввода (Read Input Registers).
+									{
+
+									} // скобка команды 0х04
+									break;
+ ad2:	00 00       	nop
+
+								} // скобка свича разбора пакета на команды. 
+
+
+
+							PORTD &= ~(1 << PORTD3); 								// тушим светодиод. тестово. показывает что контрольная сумма соответствует.
+ ad4:	82 e3       	ldi	r24, 0x32	; 50
+ ad6:	90 e0       	ldi	r25, 0x00	; 0
+ ad8:	22 e3       	ldi	r18, 0x32	; 50
+ ada:	30 e0       	ldi	r19, 0x00	; 0
+ adc:	f9 01       	movw	r30, r18
+ ade:	20 81       	ld	r18, Z
+ ae0:	27 7f       	andi	r18, 0xF7	; 247
+ ae2:	fc 01       	movw	r30, r24
+ ae4:	20 83       	st	Z, r18
+					} // else скобка проверки адреса
+
+
+
+				} // скобочка первого кейса
+				break;
+ ae6:	30 c0       	rjmp	.+96     	; 0xb48 <__stack+0x6e9>
+							PORTD &= ~(1 << PORTD3); 								// тушим светодиод. тестово. показывает что контрольная сумма соответствует.
+						} // скобка проверки совпадения принятого crc
+
+						else
+						{
+							swith_modbas = 0; 										// улетаем в кейс обработки ошибочных ситуаций.
+ ae8:	10 92 74 00 	sts	0x0074, r1
+							count_modbas_in = 0;
+ aec:	10 92 7a 00 	sts	0x007A, r1
+ af0:	10 92 79 00 	sts	0x0079, r1
+							PORTD |= 1 << PORTD3;									// зажигаем светодиод. тестово. показывает что контрольная сумма не совпала
+ af4:	82 e3       	ldi	r24, 0x32	; 50
+ af6:	90 e0       	ldi	r25, 0x00	; 0
+ af8:	22 e3       	ldi	r18, 0x32	; 50
+ afa:	30 e0       	ldi	r19, 0x00	; 0
+ afc:	f9 01       	movw	r30, r18
+ afe:	20 81       	ld	r18, Z
+ b00:	28 60       	ori	r18, 0x08	; 8
+ b02:	fc 01       	movw	r30, r24
+ b04:	20 83       	st	Z, r18
+					} // else скобка проверки адреса
+
+
+
+				} // скобочка первого кейса
+				break;
+ b06:	20 c0       	rjmp	.+64     	; 0xb48 <__stack+0x6e9>
+					} // скобка проверки адреса
+
+
+					else
+					{
+						swith_modbas = 0; 		// если адрес не совпадает, то дальше даже не проверяем пакет, выходим из кейса
+ b08:	10 92 74 00 	sts	0x0074, r1
+						count_modbas_in = 0;
+ b0c:	10 92 7a 00 	sts	0x007A, r1
+ b10:	10 92 79 00 	sts	0x0079, r1
+					} // else скобка проверки адреса
+
+
+
+				} // скобочка первого кейса
+				break;
+ b14:	19 c0       	rjmp	.+50     	; 0xb48 <__stack+0x6e9>
+				case 2:							// второй кейс формирует ответ на принятый пакет
+				{
+
+					
+					buffer_index=0;				// Сбрасываем индекс
+ b16:	10 92 7e 00 	sts	0x007E, r1
+ b1a:	10 92 7d 00 	sts	0x007D, r1
+					UDR = array_modbas_out[0];	// Отправляем первый байт из массива для отправки
+ b1e:	8c e2       	ldi	r24, 0x2C	; 44
+ b20:	90 e0       	ldi	r25, 0x00	; 0
+ b22:	20 91 85 01 	lds	r18, 0x0185
+ b26:	30 91 86 01 	lds	r19, 0x0186
+ b2a:	fc 01       	movw	r30, r24
+ b2c:	20 83       	st	Z, r18
+					UCSRB|=(1<<UDRIE);			// Разрешаем прерывание UDRE
+ b2e:	8a e2       	ldi	r24, 0x2A	; 42
+ b30:	90 e0       	ldi	r25, 0x00	; 0
+ b32:	2a e2       	ldi	r18, 0x2A	; 42
+ b34:	30 e0       	ldi	r19, 0x00	; 0
+ b36:	f9 01       	movw	r30, r18
+ b38:	20 81       	ld	r18, Z
+ b3a:	20 62       	ori	r18, 0x20	; 32
+ b3c:	fc 01       	movw	r30, r24
+ b3e:	20 83       	st	Z, r18
+
+					swith_modbas = 0; 			// сбрасываем свич в дефолт и не заходим сюда
+ b40:	10 92 74 00 	sts	0x0074, r1
+				} // скобочка второго кейса
+				break;
+ b44:	01 c0       	rjmp	.+2      	; 0xb48 <__stack+0x6e9>
+				case 3: // кейс ошибок, сюда попадаем при обнаружении ошибок. доработать!!!!
+				{
+					//swith_modbas = 0;
+				}
+				break;
+ b46:	00 00       	nop
+array_storage[58] =	array_storage[28];
+array_storage[59] =	array_storage[29];
+*/
+
+
+array_storage[0] = ((var_1 >> 8) & 0x00FF);				
+ b48:	80 91 60 00 	lds	r24, 0x0060
+ b4c:	90 91 61 00 	lds	r25, 0x0061
+ b50:	89 2f       	mov	r24, r25
+ b52:	99 27       	eor	r25, r25
+ b54:	90 93 82 00 	sts	0x0082, r25
+ b58:	80 93 81 00 	sts	0x0081, r24
+array_storage[1] = (var_1 & 0x00FF);
+ b5c:	80 91 60 00 	lds	r24, 0x0060
+ b60:	90 91 61 00 	lds	r25, 0x0061
+ b64:	90 70       	andi	r25, 0x00	; 0
+ b66:	90 93 84 00 	sts	0x0084, r25
+ b6a:	80 93 83 00 	sts	0x0083, r24
+
+
+array_storage[2] = ((var_2 >> 8) & 0x00FF);				
+ b6e:	80 91 62 00 	lds	r24, 0x0062
+ b72:	90 91 63 00 	lds	r25, 0x0063
+ b76:	89 2f       	mov	r24, r25
+ b78:	99 27       	eor	r25, r25
+ b7a:	90 93 86 00 	sts	0x0086, r25
+ b7e:	80 93 85 00 	sts	0x0085, r24
+array_storage[3] = (var_2 & 0x00FF);
+ b82:	80 91 62 00 	lds	r24, 0x0062
+ b86:	90 91 63 00 	lds	r25, 0x0063
+ b8a:	90 70       	andi	r25, 0x00	; 0
+ b8c:	90 93 88 00 	sts	0x0088, r25
+ b90:	80 93 87 00 	sts	0x0087, r24
+
+buf_probe	=	var_3;
+ b94:	80 91 64 00 	lds	r24, 0x0064
+ b98:	90 91 65 00 	lds	r25, 0x0065
+ b9c:	90 93 0c 01 	sts	0x010C, r25
+ ba0:	80 93 0b 01 	sts	0x010B, r24
+
+array_storage[4] = ((buf_probe >> 8) & 0x00FF);				
+ ba4:	80 91 0b 01 	lds	r24, 0x010B
+ ba8:	90 91 0c 01 	lds	r25, 0x010C
+ bac:	89 2f       	mov	r24, r25
+ bae:	99 27       	eor	r25, r25
+ bb0:	90 93 8a 00 	sts	0x008A, r25
+ bb4:	80 93 89 00 	sts	0x0089, r24
+array_storage[5] = (buf_probe & 0x00FF);
+ bb8:	80 91 0b 01 	lds	r24, 0x010B
+ bbc:	90 91 0c 01 	lds	r25, 0x010C
+ bc0:	90 70       	andi	r25, 0x00	; 0
+ bc2:	90 93 8c 00 	sts	0x008C, r25
+ bc6:	80 93 8b 00 	sts	0x008B, r24
+
+buf_probe	=	var_4;
+ bca:	80 91 66 00 	lds	r24, 0x0066
+ bce:	90 91 67 00 	lds	r25, 0x0067
+ bd2:	90 93 0c 01 	sts	0x010C, r25
+ bd6:	80 93 0b 01 	sts	0x010B, r24
+
+array_storage[6] = ((buf_probe >> 8) & 0x00FF);				
+ bda:	80 91 0b 01 	lds	r24, 0x010B
+ bde:	90 91 0c 01 	lds	r25, 0x010C
+ be2:	89 2f       	mov	r24, r25
+ be4:	99 27       	eor	r25, r25
+ be6:	90 93 8e 00 	sts	0x008E, r25
+ bea:	80 93 8d 00 	sts	0x008D, r24
+array_storage[7] = (buf_probe & 0x00FF);
+ bee:	80 91 0b 01 	lds	r24, 0x010B
+ bf2:	90 91 0c 01 	lds	r25, 0x010C
+ bf6:	90 70       	andi	r25, 0x00	; 0
+ bf8:	90 93 90 00 	sts	0x0090, r25
+ bfc:	80 93 8f 00 	sts	0x008F, r24
+
+buf_probe	=	var_5;
+ c00:	80 91 68 00 	lds	r24, 0x0068
+ c04:	90 91 69 00 	lds	r25, 0x0069
+ c08:	90 93 0c 01 	sts	0x010C, r25
+ c0c:	80 93 0b 01 	sts	0x010B, r24
+
+array_storage[8] = ((buf_probe >> 8) & 0x00FF);				
+ c10:	80 91 0b 01 	lds	r24, 0x010B
+ c14:	90 91 0c 01 	lds	r25, 0x010C
+ c18:	89 2f       	mov	r24, r25
+ c1a:	99 27       	eor	r25, r25
+ c1c:	90 93 92 00 	sts	0x0092, r25
+ c20:	80 93 91 00 	sts	0x0091, r24
+array_storage[9] = (buf_probe & 0x00FF);
+ c24:	80 91 0b 01 	lds	r24, 0x010B
+ c28:	90 91 0c 01 	lds	r25, 0x010C
+ c2c:	90 70       	andi	r25, 0x00	; 0
+ c2e:	90 93 94 00 	sts	0x0094, r25
+ c32:	80 93 93 00 	sts	0x0093, r24
+
+buf_probe	=	var_6;
+ c36:	80 91 6a 00 	lds	r24, 0x006A
+ c3a:	90 91 6b 00 	lds	r25, 0x006B
+ c3e:	90 93 0c 01 	sts	0x010C, r25
+ c42:	80 93 0b 01 	sts	0x010B, r24
+
+array_storage[10] = ((buf_probe >> 8) & 0x00FF);				
+ c46:	80 91 0b 01 	lds	r24, 0x010B
+ c4a:	90 91 0c 01 	lds	r25, 0x010C
+ c4e:	89 2f       	mov	r24, r25
+ c50:	99 27       	eor	r25, r25
+ c52:	90 93 96 00 	sts	0x0096, r25
+ c56:	80 93 95 00 	sts	0x0095, r24
+array_storage[11] = (buf_probe & 0x00FF);
+ c5a:	80 91 0b 01 	lds	r24, 0x010B
+ c5e:	90 91 0c 01 	lds	r25, 0x010C
+ c62:	90 70       	andi	r25, 0x00	; 0
+ c64:	90 93 98 00 	sts	0x0098, r25
+ c68:	80 93 97 00 	sts	0x0097, r24
+
+buf_probe	=	var_7;
+ c6c:	80 91 6c 00 	lds	r24, 0x006C
+ c70:	90 91 6d 00 	lds	r25, 0x006D
+ c74:	90 93 0c 01 	sts	0x010C, r25
+ c78:	80 93 0b 01 	sts	0x010B, r24
+
+array_storage[12] = ((buf_probe >> 8) & 0x00FF);				
+ c7c:	80 91 0b 01 	lds	r24, 0x010B
+ c80:	90 91 0c 01 	lds	r25, 0x010C
+ c84:	89 2f       	mov	r24, r25
+ c86:	99 27       	eor	r25, r25
+ c88:	90 93 9a 00 	sts	0x009A, r25
+ c8c:	80 93 99 00 	sts	0x0099, r24
+array_storage[13] = (buf_probe & 0x00FF);
+ c90:	80 91 0b 01 	lds	r24, 0x010B
+ c94:	90 91 0c 01 	lds	r25, 0x010C
+ c98:	90 70       	andi	r25, 0x00	; 0
+ c9a:	90 93 9c 00 	sts	0x009C, r25
+ c9e:	80 93 9b 00 	sts	0x009B, r24
+
+buf_probe	=	var_8;
+ ca2:	80 91 6e 00 	lds	r24, 0x006E
+ ca6:	90 91 6f 00 	lds	r25, 0x006F
+ caa:	90 93 0c 01 	sts	0x010C, r25
+ cae:	80 93 0b 01 	sts	0x010B, r24
+
+array_storage[14] = ((buf_probe >> 8) & 0x00FF);				
+ cb2:	80 91 0b 01 	lds	r24, 0x010B
+ cb6:	90 91 0c 01 	lds	r25, 0x010C
+ cba:	89 2f       	mov	r24, r25
+ cbc:	99 27       	eor	r25, r25
+ cbe:	90 93 9e 00 	sts	0x009E, r25
+ cc2:	80 93 9d 00 	sts	0x009D, r24
+array_storage[15] = (buf_probe & 0x00FF);
+ cc6:	80 91 0b 01 	lds	r24, 0x010B
+ cca:	90 91 0c 01 	lds	r25, 0x010C
+ cce:	90 70       	andi	r25, 0x00	; 0
+ cd0:	90 93 a0 00 	sts	0x00A0, r25
+ cd4:	80 93 9f 00 	sts	0x009F, r24
+
+
+
+		if (count_timer0 > 127)					// тестовый блок, показывает что таймер 0 считает
+ cd8:	80 91 73 00 	lds	r24, 0x0073
+ cdc:	88 23       	and	r24, r24
+ cde:	54 f4       	brge	.+20     	; 0xcf4 <__stack+0x895>
+			{
+				PORTD |= 1 << PORTD2;			// зажигаем светодиод
+ ce0:	82 e3       	ldi	r24, 0x32	; 50
+ ce2:	90 e0       	ldi	r25, 0x00	; 0
+ ce4:	22 e3       	ldi	r18, 0x32	; 50
+ ce6:	30 e0       	ldi	r19, 0x00	; 0
+ ce8:	f9 01       	movw	r30, r18
+ cea:	20 81       	ld	r18, Z
+ cec:	24 60       	ori	r18, 0x04	; 4
+ cee:	fc 01       	movw	r30, r24
+ cf0:	20 83       	st	Z, r18
+				PORTD &= ~(1 << PORTD2); 		// тушим светодиод
+			}
+			
+
+
+	}	//скобка безконечного цикла
+ cf2:	c8 ca       	rjmp	.-2672   	; 0x284 <main+0xb2>
+			{
+				PORTD |= 1 << PORTD2;			// зажигаем светодиод
+			}
+		else
+			{
+				PORTD &= ~(1 << PORTD2); 		// тушим светодиод
+ cf4:	82 e3       	ldi	r24, 0x32	; 50
+ cf6:	90 e0       	ldi	r25, 0x00	; 0
+ cf8:	22 e3       	ldi	r18, 0x32	; 50
+ cfa:	30 e0       	ldi	r19, 0x00	; 0
+ cfc:	f9 01       	movw	r30, r18
+ cfe:	20 81       	ld	r18, Z
+ d00:	2b 7f       	andi	r18, 0xFB	; 251
+ d02:	fc 01       	movw	r30, r24
+ d04:	20 83       	st	Z, r18
+			}
+			
+
+
+	}	//скобка безконечного цикла
+ d06:	be ca       	rjmp	.-2692   	; 0x284 <main+0xb2>
+
+00000d08 <CRC16>:
+
+
+// функция для расчёта контрольной суммы
+static unsigned short CRC16(int *puchMsg,  /* Сообщение       */
+                            unsigned short usDataLen /* Длина сообщения */)
+{
+ d08:	df 93       	push	r29
+ d0a:	cf 93       	push	r28
+ d0c:	cd b7       	in	r28, 0x3d	; 61
+ d0e:	de b7       	in	r29, 0x3e	; 62
+ d10:	2a 97       	sbiw	r28, 0x0a	; 10
+ d12:	0f b6       	in	r0, 0x3f	; 63
+ d14:	f8 94       	cli
+ d16:	de bf       	out	0x3e, r29	; 62
+ d18:	0f be       	out	0x3f, r0	; 63
+ d1a:	cd bf       	out	0x3d, r28	; 61
+ d1c:	98 87       	std	Y+8, r25	; 0x08
+ d1e:	8f 83       	std	Y+7, r24	; 0x07
+ d20:	7a 87       	std	Y+10, r23	; 0x0a
+ d22:	69 87       	std	Y+9, r22	; 0x09
+    unsigned short crc = 0xFFFF;
+ d24:	8f ef       	ldi	r24, 0xFF	; 255
+ d26:	9f ef       	ldi	r25, 0xFF	; 255
+ d28:	9a 83       	std	Y+2, r25	; 0x02
+ d2a:	89 83       	std	Y+1, r24	; 0x01
+    unsigned short uIndex;
+    int i;
+    for (uIndex = 0; uIndex < usDataLen; uIndex += 1) {
+ d2c:	1c 82       	std	Y+4, r1	; 0x04
+ d2e:	1b 82       	std	Y+3, r1	; 0x03
+ d30:	3f c0       	rjmp	.+126    	; 0xdb0 <CRC16+0xa8>
+        crc ^= (unsigned short)*(puchMsg + uIndex);
+ d32:	8b 81       	ldd	r24, Y+3	; 0x03
+ d34:	9c 81       	ldd	r25, Y+4	; 0x04
+ d36:	88 0f       	add	r24, r24
+ d38:	99 1f       	adc	r25, r25
+ d3a:	2f 81       	ldd	r18, Y+7	; 0x07
+ d3c:	38 85       	ldd	r19, Y+8	; 0x08
+ d3e:	82 0f       	add	r24, r18
+ d40:	93 1f       	adc	r25, r19
+ d42:	fc 01       	movw	r30, r24
+ d44:	80 81       	ld	r24, Z
+ d46:	91 81       	ldd	r25, Z+1	; 0x01
+ d48:	29 81       	ldd	r18, Y+1	; 0x01
+ d4a:	3a 81       	ldd	r19, Y+2	; 0x02
+ d4c:	82 27       	eor	r24, r18
+ d4e:	93 27       	eor	r25, r19
+ d50:	9a 83       	std	Y+2, r25	; 0x02
+ d52:	89 83       	std	Y+1, r24	; 0x01
+        for (i = 8; i != 0; i -= 1) {
+ d54:	88 e0       	ldi	r24, 0x08	; 8
+ d56:	90 e0       	ldi	r25, 0x00	; 0
+ d58:	9e 83       	std	Y+6, r25	; 0x06
+ d5a:	8d 83       	std	Y+5, r24	; 0x05
+ d5c:	20 c0       	rjmp	.+64     	; 0xd9e <CRC16+0x96>
+          if ((crc & 0x0001) == 0) { crc >>= 1; }
+ d5e:	89 81       	ldd	r24, Y+1	; 0x01
+ d60:	9a 81       	ldd	r25, Y+2	; 0x02
+ d62:	81 70       	andi	r24, 0x01	; 1
+ d64:	90 70       	andi	r25, 0x00	; 0
+ d66:	00 97       	sbiw	r24, 0x00	; 0
+ d68:	39 f4       	brne	.+14     	; 0xd78 <CRC16+0x70>
+ d6a:	89 81       	ldd	r24, Y+1	; 0x01
+ d6c:	9a 81       	ldd	r25, Y+2	; 0x02
+ d6e:	96 95       	lsr	r25
+ d70:	87 95       	ror	r24
+ d72:	9a 83       	std	Y+2, r25	; 0x02
+ d74:	89 83       	std	Y+1, r24	; 0x01
+ d76:	0e c0       	rjmp	.+28     	; 0xd94 <CRC16+0x8c>
+          else { crc >>= 1; crc ^= 0xA001; }			// полином задаём здесь
+ d78:	89 81       	ldd	r24, Y+1	; 0x01
+ d7a:	9a 81       	ldd	r25, Y+2	; 0x02
+ d7c:	96 95       	lsr	r25
+ d7e:	87 95       	ror	r24
+ d80:	9a 83       	std	Y+2, r25	; 0x02
+ d82:	89 83       	std	Y+1, r24	; 0x01
+ d84:	29 81       	ldd	r18, Y+1	; 0x01
+ d86:	3a 81       	ldd	r19, Y+2	; 0x02
+ d88:	81 e0       	ldi	r24, 0x01	; 1
+ d8a:	90 ea       	ldi	r25, 0xA0	; 160
+ d8c:	82 27       	eor	r24, r18
+ d8e:	93 27       	eor	r25, r19
+ d90:	9a 83       	std	Y+2, r25	; 0x02
+ d92:	89 83       	std	Y+1, r24	; 0x01
+    unsigned short crc = 0xFFFF;
+    unsigned short uIndex;
+    int i;
+    for (uIndex = 0; uIndex < usDataLen; uIndex += 1) {
+        crc ^= (unsigned short)*(puchMsg + uIndex);
+        for (i = 8; i != 0; i -= 1) {
+ d94:	8d 81       	ldd	r24, Y+5	; 0x05
+ d96:	9e 81       	ldd	r25, Y+6	; 0x06
+ d98:	01 97       	sbiw	r24, 0x01	; 1
+ d9a:	9e 83       	std	Y+6, r25	; 0x06
+ d9c:	8d 83       	std	Y+5, r24	; 0x05
+ d9e:	8d 81       	ldd	r24, Y+5	; 0x05
+ da0:	9e 81       	ldd	r25, Y+6	; 0x06
+ da2:	00 97       	sbiw	r24, 0x00	; 0
+ da4:	e1 f6       	brne	.-72     	; 0xd5e <CRC16+0x56>
+                            unsigned short usDataLen /* Длина сообщения */)
+{
+    unsigned short crc = 0xFFFF;
+    unsigned short uIndex;
+    int i;
+    for (uIndex = 0; uIndex < usDataLen; uIndex += 1) {
+ da6:	8b 81       	ldd	r24, Y+3	; 0x03
+ da8:	9c 81       	ldd	r25, Y+4	; 0x04
+ daa:	01 96       	adiw	r24, 0x01	; 1
+ dac:	9c 83       	std	Y+4, r25	; 0x04
+ dae:	8b 83       	std	Y+3, r24	; 0x03
+ db0:	2b 81       	ldd	r18, Y+3	; 0x03
+ db2:	3c 81       	ldd	r19, Y+4	; 0x04
+ db4:	89 85       	ldd	r24, Y+9	; 0x09
+ db6:	9a 85       	ldd	r25, Y+10	; 0x0a
+ db8:	28 17       	cp	r18, r24
+ dba:	39 07       	cpc	r19, r25
+ dbc:	08 f4       	brcc	.+2      	; 0xdc0 <CRC16+0xb8>
+ dbe:	b9 cf       	rjmp	.-142    	; 0xd32 <CRC16+0x2a>
+          else { crc >>= 1; crc ^= 0xA001; }			// полином задаём здесь
+        }
+    }
+    // Изменим порядок следования байт
+ //   crc = ((crc >> 8) & 0x00FF) | ((crc << 8) & 0xFF00);
+    return crc;
+ dc0:	89 81       	ldd	r24, Y+1	; 0x01
+ dc2:	9a 81       	ldd	r25, Y+2	; 0x02
+}
+ dc4:	2a 96       	adiw	r28, 0x0a	; 10
+ dc6:	0f b6       	in	r0, 0x3f	; 63
+ dc8:	f8 94       	cli
+ dca:	de bf       	out	0x3e, r29	; 62
+ dcc:	0f be       	out	0x3f, r0	; 63
+ dce:	cd bf       	out	0x3d, r28	; 61
+ dd0:	cf 91       	pop	r28
+ dd2:	df 91       	pop	r29
+ dd4:	08 95       	ret
+
+00000dd6 <__vector_14>:
+
+
+
+// обработчик прерывания сканирования АЦП
+ISR(ADC_vect)									
+{	
+ dd6:	1f 92       	push	r1
+ dd8:	0f 92       	push	r0
+ dda:	0f b6       	in	r0, 0x3f	; 63
+ ddc:	0f 92       	push	r0
+ dde:	11 24       	eor	r1, r1
+ de0:	2f 93       	push	r18
+ de2:	8f 93       	push	r24
+ de4:	9f 93       	push	r25
+ de6:	ef 93       	push	r30
+ de8:	ff 93       	push	r31
+ dea:	df 93       	push	r29
+ dec:	cf 93       	push	r28
+ dee:	cd b7       	in	r28, 0x3d	; 61
+ df0:	de b7       	in	r29, 0x3e	; 62
+	
+if (switch_var <= 7)
+ df2:	80 91 70 00 	lds	r24, 0x0070
+ df6:	90 91 71 00 	lds	r25, 0x0071
+ dfa:	88 30       	cpi	r24, 0x08	; 8
+ dfc:	91 05       	cpc	r25, r1
+ dfe:	08 f0       	brcs	.+2      	; 0xe02 <__vector_14+0x2c>
+ e00:	a7 c0       	rjmp	.+334    	; 0xf50 <__vector_14+0x17a>
+{
+
+	switch (switch_var)
+ e02:	80 91 70 00 	lds	r24, 0x0070
+ e06:	90 91 71 00 	lds	r25, 0x0071
+ e0a:	83 30       	cpi	r24, 0x03	; 3
+ e0c:	91 05       	cpc	r25, r1
+ e0e:	09 f4       	brne	.+2      	; 0xe12 <__vector_14+0x3c>
+ e10:	48 c0       	rjmp	.+144    	; 0xea2 <__vector_14+0xcc>
+ e12:	84 30       	cpi	r24, 0x04	; 4
+ e14:	91 05       	cpc	r25, r1
+ e16:	38 f4       	brcc	.+14     	; 0xe26 <__vector_14+0x50>
+ e18:	81 30       	cpi	r24, 0x01	; 1
+ e1a:	91 05       	cpc	r25, r1
+ e1c:	21 f1       	breq	.+72     	; 0xe66 <__vector_14+0x90>
+ e1e:	82 30       	cpi	r24, 0x02	; 2
+ e20:	91 05       	cpc	r25, r1
+ e22:	80 f5       	brcc	.+96     	; 0xe84 <__vector_14+0xae>
+ e24:	11 c0       	rjmp	.+34     	; 0xe48 <__vector_14+0x72>
+ e26:	85 30       	cpi	r24, 0x05	; 5
+ e28:	91 05       	cpc	r25, r1
+ e2a:	09 f4       	brne	.+2      	; 0xe2e <__vector_14+0x58>
+ e2c:	58 c0       	rjmp	.+176    	; 0xede <__vector_14+0x108>
+ e2e:	85 30       	cpi	r24, 0x05	; 5
+ e30:	91 05       	cpc	r25, r1
+ e32:	08 f4       	brcc	.+2      	; 0xe36 <__vector_14+0x60>
+ e34:	45 c0       	rjmp	.+138    	; 0xec0 <__vector_14+0xea>
+ e36:	86 30       	cpi	r24, 0x06	; 6
+ e38:	91 05       	cpc	r25, r1
+ e3a:	09 f4       	brne	.+2      	; 0xe3e <__vector_14+0x68>
+ e3c:	5f c0       	rjmp	.+190    	; 0xefc <__vector_14+0x126>
+ e3e:	87 30       	cpi	r24, 0x07	; 7
+ e40:	91 05       	cpc	r25, r1
+ e42:	09 f4       	brne	.+2      	; 0xe46 <__vector_14+0x70>
+ e44:	6b c0       	rjmp	.+214    	; 0xf1c <__vector_14+0x146>
+ e46:	7a c0       	rjmp	.+244    	; 0xf3c <__vector_14+0x166>
+	{
+		case 0:
+		{
+			var_1 = ADCW;
+ e48:	84 e2       	ldi	r24, 0x24	; 36
+ e4a:	90 e0       	ldi	r25, 0x00	; 0
+ e4c:	fc 01       	movw	r30, r24
+ e4e:	80 81       	ld	r24, Z
+ e50:	91 81       	ldd	r25, Z+1	; 0x01
+ e52:	90 93 61 00 	sts	0x0061, r25
+ e56:	80 93 60 00 	sts	0x0060, r24
+			ADMUX = (0<<REFS1)|(1<<REFS0)|(0<<ADLAR)|(0<<MUX3)|(0<<MUX2)|(0<<MUX1)|(1<<MUX0);
+ e5a:	87 e2       	ldi	r24, 0x27	; 39
+ e5c:	90 e0       	ldi	r25, 0x00	; 0
+ e5e:	21 e4       	ldi	r18, 0x41	; 65
+ e60:	fc 01       	movw	r30, r24
+ e62:	20 83       	st	Z, r18
+		} break;
+ e64:	6b c0       	rjmp	.+214    	; 0xf3c <__vector_14+0x166>
+		case 1:
+		{
+			var_2 = ADCW;
+ e66:	84 e2       	ldi	r24, 0x24	; 36
+ e68:	90 e0       	ldi	r25, 0x00	; 0
+ e6a:	fc 01       	movw	r30, r24
+ e6c:	80 81       	ld	r24, Z
+ e6e:	91 81       	ldd	r25, Z+1	; 0x01
+ e70:	90 93 63 00 	sts	0x0063, r25
+ e74:	80 93 62 00 	sts	0x0062, r24
+			ADMUX = (0<<REFS1)|(1<<REFS0)|(0<<ADLAR)|(0<<MUX3)|(0<<MUX2)|(1<<MUX1)|(0<<MUX0);
+ e78:	87 e2       	ldi	r24, 0x27	; 39
+ e7a:	90 e0       	ldi	r25, 0x00	; 0
+ e7c:	22 e4       	ldi	r18, 0x42	; 66
+ e7e:	fc 01       	movw	r30, r24
+ e80:	20 83       	st	Z, r18
+		} break;
+ e82:	5c c0       	rjmp	.+184    	; 0xf3c <__vector_14+0x166>
+		case 2:
+		{
+			var_3 = ADCW;
+ e84:	84 e2       	ldi	r24, 0x24	; 36
+ e86:	90 e0       	ldi	r25, 0x00	; 0
+ e88:	fc 01       	movw	r30, r24
+ e8a:	80 81       	ld	r24, Z
+ e8c:	91 81       	ldd	r25, Z+1	; 0x01
+ e8e:	90 93 65 00 	sts	0x0065, r25
+ e92:	80 93 64 00 	sts	0x0064, r24
+			ADMUX = (0<<REFS1)|(1<<REFS0)|(0<<ADLAR)|(0<<MUX3)|(0<<MUX2)|(1<<MUX1)|(1<<MUX0);
+ e96:	87 e2       	ldi	r24, 0x27	; 39
+ e98:	90 e0       	ldi	r25, 0x00	; 0
+ e9a:	23 e4       	ldi	r18, 0x43	; 67
+ e9c:	fc 01       	movw	r30, r24
+ e9e:	20 83       	st	Z, r18
+		} break;
+ ea0:	4d c0       	rjmp	.+154    	; 0xf3c <__vector_14+0x166>
+		case 3:
+		{
+			var_4 = ADCW;
+ ea2:	84 e2       	ldi	r24, 0x24	; 36
+ ea4:	90 e0       	ldi	r25, 0x00	; 0
+ ea6:	fc 01       	movw	r30, r24
+ ea8:	80 81       	ld	r24, Z
+ eaa:	91 81       	ldd	r25, Z+1	; 0x01
+ eac:	90 93 67 00 	sts	0x0067, r25
+ eb0:	80 93 66 00 	sts	0x0066, r24
+			ADMUX = (0<<REFS1)|(1<<REFS0)|(0<<ADLAR)|(0<<MUX3)|(1<<MUX2)|(0<<MUX1)|(0<<MUX0);
+ eb4:	87 e2       	ldi	r24, 0x27	; 39
+ eb6:	90 e0       	ldi	r25, 0x00	; 0
+ eb8:	24 e4       	ldi	r18, 0x44	; 68
+ eba:	fc 01       	movw	r30, r24
+ ebc:	20 83       	st	Z, r18
+		} break;
+ ebe:	3e c0       	rjmp	.+124    	; 0xf3c <__vector_14+0x166>
+		case 4:
+		{
+			var_5 = ADCW;
+ ec0:	84 e2       	ldi	r24, 0x24	; 36
+ ec2:	90 e0       	ldi	r25, 0x00	; 0
+ ec4:	fc 01       	movw	r30, r24
+ ec6:	80 81       	ld	r24, Z
+ ec8:	91 81       	ldd	r25, Z+1	; 0x01
+ eca:	90 93 69 00 	sts	0x0069, r25
+ ece:	80 93 68 00 	sts	0x0068, r24
+			ADMUX = (0<<REFS1)|(1<<REFS0)|(0<<ADLAR)|(0<<MUX3)|(1<<MUX2)|(0<<MUX1)|(1<<MUX0);
+ ed2:	87 e2       	ldi	r24, 0x27	; 39
+ ed4:	90 e0       	ldi	r25, 0x00	; 0
+ ed6:	25 e4       	ldi	r18, 0x45	; 69
+ ed8:	fc 01       	movw	r30, r24
+ eda:	20 83       	st	Z, r18
+		} break;
+ edc:	2f c0       	rjmp	.+94     	; 0xf3c <__vector_14+0x166>
+		case 5:
+		{
+			var_6 = ADCW;
+ ede:	84 e2       	ldi	r24, 0x24	; 36
+ ee0:	90 e0       	ldi	r25, 0x00	; 0
+ ee2:	fc 01       	movw	r30, r24
+ ee4:	80 81       	ld	r24, Z
+ ee6:	91 81       	ldd	r25, Z+1	; 0x01
+ ee8:	90 93 6b 00 	sts	0x006B, r25
+ eec:	80 93 6a 00 	sts	0x006A, r24
+			ADMUX = (0<<REFS1)|(1<<REFS0)|(1<<ADLAR)|(0<<MUX3)|(1<<MUX2)|(1<<MUX1)|(0<<MUX0);
+ ef0:	87 e2       	ldi	r24, 0x27	; 39
+ ef2:	90 e0       	ldi	r25, 0x00	; 0
+ ef4:	26 e6       	ldi	r18, 0x66	; 102
+ ef6:	fc 01       	movw	r30, r24
+ ef8:	20 83       	st	Z, r18
+		} break;
+ efa:	20 c0       	rjmp	.+64     	; 0xf3c <__vector_14+0x166>
+		case 6:
+		{
+			var_7 = ADCH;
+ efc:	85 e2       	ldi	r24, 0x25	; 37
+ efe:	90 e0       	ldi	r25, 0x00	; 0
+ f00:	fc 01       	movw	r30, r24
+ f02:	80 81       	ld	r24, Z
+ f04:	88 2f       	mov	r24, r24
+ f06:	90 e0       	ldi	r25, 0x00	; 0
+ f08:	90 93 6d 00 	sts	0x006D, r25
+ f0c:	80 93 6c 00 	sts	0x006C, r24
+			ADMUX = (0<<REFS1)|(1<<REFS0)|(1<<ADLAR)|(0<<MUX3)|(1<<MUX2)|(1<<MUX1)|(1<<MUX0);
+ f10:	87 e2       	ldi	r24, 0x27	; 39
+ f12:	90 e0       	ldi	r25, 0x00	; 0
+ f14:	27 e6       	ldi	r18, 0x67	; 103
+ f16:	fc 01       	movw	r30, r24
+ f18:	20 83       	st	Z, r18
+		} break;
+ f1a:	10 c0       	rjmp	.+32     	; 0xf3c <__vector_14+0x166>
+		case 7:
+		{
+			var_8 = ADCH;
+ f1c:	85 e2       	ldi	r24, 0x25	; 37
+ f1e:	90 e0       	ldi	r25, 0x00	; 0
+ f20:	fc 01       	movw	r30, r24
+ f22:	80 81       	ld	r24, Z
+ f24:	88 2f       	mov	r24, r24
+ f26:	90 e0       	ldi	r25, 0x00	; 0
+ f28:	90 93 6f 00 	sts	0x006F, r25
+ f2c:	80 93 6e 00 	sts	0x006E, r24
+			ADMUX = (0<<REFS1)|(1<<REFS0)|(0<<ADLAR)|(0<<MUX3)|(0<<MUX2)|(0<<MUX1)|(0<<MUX0);
+ f30:	87 e2       	ldi	r24, 0x27	; 39
+ f32:	90 e0       	ldi	r25, 0x00	; 0
+ f34:	20 e4       	ldi	r18, 0x40	; 64
+ f36:	fc 01       	movw	r30, r24
+ f38:	20 83       	st	Z, r18
+		} break;
+ f3a:	00 00       	nop
+	}	// скобочка кейса
+
+switch_var++;
+ f3c:	80 91 70 00 	lds	r24, 0x0070
+ f40:	90 91 71 00 	lds	r25, 0x0071
+ f44:	01 96       	adiw	r24, 0x01	; 1
+ f46:	90 93 71 00 	sts	0x0071, r25
+ f4a:	80 93 70 00 	sts	0x0070, r24
+ f4e:	04 c0       	rjmp	.+8      	; 0xf58 <__vector_14+0x182>
+
+} //скобочка ифа
+
+else
+{
+	switch_var = 0;
+ f50:	10 92 71 00 	sts	0x0071, r1
+ f54:	10 92 70 00 	sts	0x0070, r1
+}
+
+// а тут выбор канала нужно организовать автоматически.
+ADCSRA = (1<<ADEN)|(1<<ADIE)|(1<<ADSC)|(0<<ADATE)|(5<<ADPS0)	; //Запустили
+ f58:	86 e2       	ldi	r24, 0x26	; 38
+ f5a:	90 e0       	ldi	r25, 0x00	; 0
+ f5c:	2d ec       	ldi	r18, 0xCD	; 205
+ f5e:	fc 01       	movw	r30, r24
+ f60:	20 83       	st	Z, r18
+
+}
+ f62:	cf 91       	pop	r28
+ f64:	df 91       	pop	r29
+ f66:	ff 91       	pop	r31
+ f68:	ef 91       	pop	r30
+ f6a:	9f 91       	pop	r25
+ f6c:	8f 91       	pop	r24
+ f6e:	2f 91       	pop	r18
+ f70:	0f 90       	pop	r0
+ f72:	0f be       	out	0x3f, r0	; 63
+ f74:	0f 90       	pop	r0
+ f76:	1f 90       	pop	r1
+ f78:	18 95       	reti
+
+00000f7a <_exit>:
+ f7a:	f8 94       	cli
+
+00000f7c <__stop_program>:
+ f7c:	ff cf       	rjmp	.-2      	; 0xf7c <__stop_program>
